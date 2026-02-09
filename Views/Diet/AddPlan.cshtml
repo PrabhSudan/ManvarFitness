@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = " Diet Plan Management";
+}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark-subtle">
+                    <h5>Add Diet Plan</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Diet" asp-action="AddPlan" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="Name" id="name" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Breakfast</label>
+                            <textarea name="Breakfast" id="breakfast" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Lunch</label>
+                            <textarea name="Lunch" id="lunch" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Snacks</label>
+                            <textarea name="Snacks" id="snacks" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Dinner</label>
+                            <textarea name="Dinner" id="dinner" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <a class="btn btn-secondary btn-sm" href="/Diet/Index">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-success btn-sm px-4">
+                            Save
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

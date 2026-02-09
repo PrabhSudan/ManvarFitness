@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Revenue Videos";
+}
+<h1 class="fw-semibold mb-0" style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">Revenue / Payments</h1><br /><br />
+    
+<div class="container mt-3">
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <small>Total Revenue</small>
+                    <h5 class="mt-2"> ₹676781</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <small>Monthly Revenue</small>
+                    <h5 class="mt-2"> ₹56760</h5>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <small>Monthly Expenses</small>
+                    <h5 class="mt-2"> ₹30000</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Filters-->
+    <div class="mb-3">
+        <select id="dateFilter" class="form-select d-inline w-auto me-2">
+            <option value="">Filter by Date</option>
+            <option value="1">Last 24 hours</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last Month</option>
+            <option value="90">Last 3 Months</option>
+            <option value="180">Last 6 Months</option>
+            <option value="365">Last 1 year</option>
+        </select>
+
+        <select id="planFilter" class="form-select d-inline w-auto me-2">
+            <option value="">Filter by Plan</option>
+            <option value="basic">Basic</option>
+            <option value="premium">Premium</option>
+        </select>
+
+        <select id="statusFilter" class="form-select d-inline w-auto me-2">
+            <option value="">Filter by Status</option>
+            <option value="completed">Completed</option>
+            <option value="pending">Pending</option>
+        </select>
+    </div>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>User</th>
+                <th>Plan</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>User A</td>
+                <td>Premium</td>
+                <td>$50.00</td>
+                <td>2026-01-26</td>
+                <td class="text-success">Completed</td>
+            </tr>
+            <tr>
+                <td>User B</td>
+                <td>Basic</td>
+                <td>$20.00</td>
+                <td>2025-10-25</td>
+                <td class="text-warning">Pending</td>
+            </tr>
+            <tr>
+                <td>User C</td>
+                <td>Premium</td>
+                <td>$50.00</td>
+                <td>2025-12-24</td>
+                <td class="text-success">Completed</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<script>
+        const planFilter = document.getElementById("planFilter");
+    const dateFilter = document.getElementById("dateFilter");
+    const statusFilter = document.getElementById("statusFilter");
+    const rows = document.querySelectorAll("table tbody tr");
+
+    function filterPayments() {
+        const selectedPlan = planFilter.value.toLowerCase();
+        const dateRange = dateFilter.value;
+        const selectedStatus = statusFilter.value.toLowerCase();
+
+        const today = new Date();
+
+        rows.forEach(row => {
+            const planText = row.children[1].innerText.toLowerCase();
+            const dateText = row.children[3].innerText;
+            const statusText = row.children[4].innerText.toLowerCase();
+
+            const rowDate = new Date(dateText);
+
+            // PLAN filter
+            const planMatch = !selectedPlan || planText === selectedPlan;
+
+            // DATE filter
+            let dateMatch = true;
+            if (dateRange) {
+                const days = parseInt(dateRange);
+                const diffDays = (today - rowDate) / (1000 * 60 * 60 * 24);
+                dateMatch = diffDays <= days;
+            }
+
+            // STATUS filter
+            const statusMatch = !selectedStatus || statusText === selectedStatus;
+
+            row.style.display = (planMatch && dateMatch && statusMatch) ? "" : "none";
+        });
+    }
+
+    planFilter.addEventListener("change", filterPayments);
+    dateFilter.addEventListener("change", filterPayments);
+    statusFilter.addEventListener("change", filterPayments);
+
+</script>
+

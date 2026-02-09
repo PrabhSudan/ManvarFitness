@@ -1,0 +1,104 @@
+﻿@model IEnumerable<dynamic>
+
+<h1 class="fw-semibold mb-0" style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">Users</h1>
+<div class="container-fluid px-4">
+
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <a asp-controller="User"
+           asp-action="Create"
+           class="btn btn-success px-4 py-2 fw-semibold">
+            Add New User
+        </a>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="row mb-3 g-2">
+        <div class="col-lg-3 col-md-4">
+            <input type="text" id="searchPlan"
+                   class="form-control w-100"
+                   placeholder="Search User..." />
+        </div>
+
+        <div class="col-lg-3 col-md-4">
+            <select id="statusFilter" class="form-select">
+                <option value="">Filter by Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+
+        <div class="col-lg-3 col-md-4">
+            <select id="planFilter" class="form-select">
+                <option value="">Filter by Plan</option>
+                <option value="basic">Basic</option>
+                <option value="premium">Premium</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="d-none d-md-table-cell">ID</th>
+                    <th>Name</th>
+                    <th class="d-none d-md-table-cell">Email</th>
+                    <th class="d-none d-md-table-cell">Phone</th>
+                    <th>Plan</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td class="d-none d-md-table-cell">@user.Id</td>
+                        <td>@user.Name</td>
+                        <td class="d-none d-md-table-cell">@user.Email</td>
+                        <td class="d-none d-md-table-cell">@user.Phone</td>
+                        <td>@user.Plan</td>
+                        <td>@user.Status</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a class="btn btn-warning btn-sm" asp-action="Details" asp-route-id="@user.Id">Details</a>
+                                <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@user.Id">Edit</a>
+                                <a class="btn btn-warning btn-sm" asp-action="Delete" asp-route-id="@user.Id">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const searchPlan = document.getElementById("searchPlan");
+    const statusFilter = document.getElementById("statusFilter");
+    const planFilter = document.getElementById("planFilter");
+    const rows = document.querySelectorAll("table tbody tr");
+
+    function filterUsers() {
+        const searchText = searchPlan.value.toLowerCase();
+        const statusValue = statusFilter.value.toLowerCase();
+        const planValue = planFilter.value.toLowerCase();
+
+        rows.forEach(row => {
+            const planText = row.children[4].innerText.toLowerCase();
+            const statusText = row.children[5].innerText.toLowerCase();
+
+            const matchesSearch = row.innerText.toLowerCase().includes(searchText);
+            const matchesPlan = !planValue || planText === planValue;
+            const matchesStatus = !statusValue || statusText === statusValue;
+
+            row.style.display =
+                matchesSearch && matchesPlan && matchesStatus ? "" : "none";
+        });
+    }
+
+    searchPlan.addEventListener("keyup", filterUsers);
+    statusFilter.addEventListener("change", filterUsers);
+    planFilter.addEventListener("change", filterUsers);
+</script>

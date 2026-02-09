@@ -1,0 +1,117 @@
+﻿@{
+    ViewData["Title"] = "Diet Management";
+    var plans = ViewBag.Diet as List<dynamic> ?? new List<dynamic>();
+}
+<h1 class="fw-semibold mb-0"style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">Diet Plans</h1><br /></br>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <input type="text"
+               id="searchPlan"
+               class="form-control w-25"
+               placeholder="Search Diet Plans..."
+               onkeyup="filterPlans()" />
+    </div>
+
+    <a asp-controller="Diet"
+       asp-action="AddPlan"
+       class="btn btn-success btn-sm">
+        Add Diet Plan
+    </a>
+    <br /><br />
+
+    <div class="row">
+        <!-- LEFT LIST -->
+        <div class="col-md-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark-subtle">
+                    <h6 class="mb-0">Diet Plan List</h6>
+                </div>
+                <div class="list-group list-group-flush" id="planList">
+                    @foreach (var plan in plans)
+                    {
+                        <button type="button"
+                                class="list-group-item list-group-item-action plan-item"
+                                data-name="@plan.Name"
+                                onclick="loadPlan(
+                                        '@plan.Name',
+                                        '@plan.Breakfast',
+                                        '@plan.Lunch',
+                                        '@plan.Snacks',
+                                        '@plan.Dinner')">
+                            @plan.Name
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT DETAILS -->
+        <div class="col-md-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark-subtle">
+                    <h6 class="mb-0">Diet Plan Detail</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddPlan" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="Name" id="name" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Breakfast</label>
+                            <textarea name="Breakfast" id="breakfast" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Lunch</label>
+                            <textarea name="Lunch" id="lunch" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Snacks</label>
+                            <textarea name="Snacks" id="snacks" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Dinner</label>
+                            <textarea name="Dinner" id="dinner" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <a class="btn btn-secondary btn-sm" href="/Diet/Index">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-success btn-sm px-4">
+                            Save
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // SEARCH 
+    function filterPlans() {
+        let search = document.getElementById("searchPlan").value.toLowerCase();
+        let items = document.getElementsByClassName("plan-item");
+
+        for (let i = 0; i < items.length; i++) {
+            let planName = items[i].getAttribute("data-name").toLowerCase();
+            items[i].style.display = planName.includes(search) ? "" : "none";
+        }
+    }
+
+    // LOAD PLAN DETAILS 
+    function loadPlan(name, breakfast, lunch, snacks, dinner) {
+        document.getElementById("name").value = name;
+        document.getElementById("breakfast").value = breakfast;
+        document.getElementById("lunch").value = lunch;
+        document.getElementById("snacks").value = snacks;
+        document.getElementById("dinner").value = dinner;
+    }
+</script>

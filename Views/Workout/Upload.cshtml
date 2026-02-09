@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Upload Workout Video";
+}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Upload Video</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Upload" asp-controller="Workout" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label class="form-label">Video Title</label>
+                            <input type="text" name="title" class="form-control" placeholder="Enter Video Title" required/>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label"> Description</label>
+                            <textarea name="description" class="form-control" rows="3" placeholder="Enter Description" required ></textarea>
+                        </div>
+
+                        <!-- Difficulty -->
+                        <div class="mb-3">
+                            <label class="form-label"> Difficult</label>
+                            <select name="difficultty" class="form-control">
+                                <option value="">Select Difficulty level</option>
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+
+                        <!-- Video File -->
+                        <div class="mb-4">
+                            <label class="form-label">Upload Video</label>
+                            <input type="file" name="videofile" class="form-control" accept="video/*" required />
+                        </div>
+
+                        <a class="btn btn-secondary btn-sm"href="/Workout/Videos">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-success btn-sm px-4">
+                            Upload
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

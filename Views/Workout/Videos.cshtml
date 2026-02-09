@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Workout Videos";
+    var videos = ViewBag.Videos as List<dynamic>;
+}
+ <h1 class="fw-semibold mb-0" style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">Workout Videos</h1>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        
+        <a asp-controller="Workout"
+           asp-action="Upload"
+           class="btn btn-success btn-sm ">
+            Upload New Video
+        </a>
+    </div><br />
+    <div class="row">
+        @foreach (var video in videos)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center p-2">
+                        <div class="border mb-3" style="height:160px;">
+                            @if(!string.IsNullOrEmpty(video.FileName))
+                            {
+                                <video controls class="w-100 h-100" style="object-fit:cover;">
+                                    <source src="~/uploads/@video.FileName" type="video/mp4"/>
+                                    Your browser does not support the video tag.
+                                </video>
+                            }
+                            else
+                            {
+                                <div class="d-flex align-items-center justify-content-center text-muted h-100">
+                                    Video Preview
+                                </div>
+                            }
+                        </div>
+                        <h6 class="fw-bold text-start">@video.Title</h6>
+                        <p class="text-muted text-start mb-1">@video.Description</p>
+                        <p class="text-start mb-0">
+                            <small><b>Difficulty:</b>  @video.Difficulty</small><br />
+                            <small><b>Status:</b>
+                                <span class="@(video.Status == "Active" ? "text-success" : "text-danger")">
+                                    @video.Status
+                                </span>
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,182 @@
+﻿@using System.Text.RegularExpressions
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ManvarFitness</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    @await RenderSectionAsync("VendorStyles", required: false)
+</head>
+<body>
+    @{
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+        var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    }
+    <!-- Top Navbar -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <!-- Hamburger (mobile only) -->
+            <button class="menu-btn" id="menuToggle"> ☰ </button>
+            <img src="~/img/IMG_5797.JPG (1).jpeg" alt="Logo" class="logo" />
+            <span><b>Manvar Fitness</b></span>
+        </div>
+        <div class="dropdown text-end position-relative">
+            <a class="d-flex align-items-center justify-content-center text-decoration-none dropdown-toggle"
+               href="#" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+               style="width: 40px; height: 40px; border-radius: 50%; color: white; font-size: 1.2rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                👤
+            </a>
+            <div class="dropdown-menu dropdown-menu-end shadow p-0 mt-2 border-0 rounded-3"
+                 aria-labelledby="profileDropdown" style="min-width: 240px;">
+                <div class="card border-0 rounded-3">
+                    <div class="card-body p-3" style="background-color: #fff;">
+                        <h6 class="card-title mb-2" style="color: #333;">Name:Prabh</h6><br />
+
+                        <h6 class="card-title mb-2" style="color: #333;">Role:Coach</h6><br />
+
+                        <form method="post" asp-controller="Auth" asp-action="Logout">
+                            <button type="submit" class="btn w-100 fw-semibold text-white"
+                                    style="background-color: #FF7F11; border-radius: 8px; transition: background 0.3s;">
+                                Logout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </header>
+
+
+    <!-- Main Layout -->
+    <div class="dashboard">
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <ul>
+                <li class="@(currentController == "Dashboard" ? "active" : "")">
+                    <a asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                </li>
+                <li class="dropdown-li@(currentController == "User" ? "active" : "")">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usersSubmenu">
+                        Users
+                    </a>
+                    <ul class="collapse list-unstyled ps-3 @(currentController == "User" || currentController == "UserRoles" || currentController == "UserActivity" ? "show" : "")" id="usersSubmenu">
+                        <li class="@(currentController == "User" ? "active" : "")">
+                            <a asp-controller="User" asp-action="Index">All Users</a>
+                        </li>
+                        <li class="@(currentController == "UserRoles" ? "active" : "")">
+                            <a asp-controller="UserRoles" asp-action="Index">Roles</a>
+                        </li>
+                        <li class="@(currentController == "UserActivity" ? "active" : "")">
+                            <a asp-controller="UserActivity" asp-action="Index">Activity Log</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="@(currentController == "Result" ? "active" : "")">
+                    <a asp-controller="Result" asp-action="Index">Results</a>
+                </li>
+                <li class="dropdown-li @(currentController == "Diet" || currentController == "MealRecipes" ? "active-parent" : "")">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#dietSubmenu">
+                        Diet Plans
+                        
+                    </a>
+                    <ul class="collapse list-unstyled ps-3 @(currentController == "Diet" || currentController == "MealRecipes" ? "show" : "")" id="dietSubmenu">
+                        <li class="@(currentController == "Diet" && currentAction == "Index" ? "active" : "")">
+                            <a asp-controller="Diet" asp-action="Index">Diet Overview</a>
+                        </li>
+                        <li class="@(currentController == "MealRecipes" && currentAction == "Index" ? "active" : "")">
+                            <a asp-controller="MealRecipes" asp-action="Index">Meal Recipes</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown-li @(currentController == "Workout" || currentController == "YogaExercise" || currentController == "Meditation" ? "active-parent" : "")">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#workoutSubmenu">
+                        Workouts     
+                    </a>
+                    <ul class="collapse list-unstyled ps-3 @(currentController == "Workout" || currentController == "YogaExercise" || currentController == "Meditation" ? "show" : "")" id="workoutSubmenu">
+                        <li class="@(currentController == "Workout" && currentAction == "Videos" ? "active" : "")">
+                            <a asp-controller="Workout" asp-action="Videos">Workout Videos</a>
+                        </li>
+                        <li class="@(currentController == "YogaExercise" ? "active" : "")">
+                            <a asp-controller="YogaExercise" asp-action="Index">Yoga & Exercises</a>
+                        </li>
+                        <li class="@(currentController == "Meditation" ? "active" : "")">
+                            <a asp-controller="Meditation" asp-action="Index">Meditation Music</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="@(currentController == "Herbs" ? "active" : "")">
+                    <a asp-controller="Herbs" asp-action="Index">Herbs</a>
+                </li>
+
+                <li class="dropdown-li@(currentController == "Revenue" || currentController == "Meditation" ? "activeparent" : "")">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#revenueSubmenu">
+                        Revenue
+                    </a>
+                    
+                    <ul class="collapse list-unstyled ps-3 @(currentController == "Revenue" || currentController == "Payments" ? "show" : "")" id="revenueSubmenu">
+                        <li class="@(currentController == "Revenue" && currentAction == "Index" ? "active" : "")">
+                            <a asp-controller="Revenue" asp-action="Index">Revenue Overview</a>
+                        </li>
+                        <li class="@(currentController == "Payments" && currentAction == "Index" ? "active" : "")">
+                            <a asp-controller="Payments" asp-action="Index">Payments</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Content -->
+        <main class="content">
+            @RenderBody()
+        </main>
+
+    </div>
+    <script>
+        document.getElementById("menuToggle").addEventListener("click", function () {
+            document.getElementById("sidebar").classList.toggle("active");
+        });
+
+        // Auto-expand active submenu on page load
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check if Diet submenu should be expanded
+            if ('@currentController' == "Diet" || '@currentController' == "MealRecipes") {
+                const dietSubmenu = document.getElementById("dietSubmenu");
+                if (dietSubmenu) {
+                    dietSubmenu.classList.add("show");
+                }
+            }
+
+            // Check if Workout submenu should be expanded
+            if ('@currentController' == "Workout" || '@currentController' == "YogaExercise" || '@currentController' == "Meditation") {
+                const workoutSubmenu = document.getElementById("workoutSubmenu");
+                if (workoutSubmenu) {
+                    workoutSubmenu.classList.add("show");
+                }
+            }
+            if ('@currentController' == "Revenue" || '@currentController' == "Payments") {
+                const revenueSubmenu = document.getElementById("revenueSubmenu");
+                if (revenueSubmenu) {
+                    revenueSubmenu.classList.add("show");
+                }
+            }
+             if ('@currentController' == "User" || currentController == "UserRoles" || currentController == "UserActivity" ) {
+                const usersSubmenu = document.getElementById("usersSubmenu");
+                if (usersSubmenu) {
+                    usersSubmenu.classList.add("show");
+                }
+            }
+        });
+    </script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>
