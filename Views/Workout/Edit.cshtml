@@ -1,0 +1,101 @@
+﻿@model ManvarFitness.Entity.WorkoutVideo
+@{
+    ViewData["Title"] = "Edit Workout Video";
+}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Edit Video</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" asp-controller="Workout" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label class="form-label">Video Title</label>
+                            <input type="text" name="Title" class="form-control" placeholder="Enter Video Title" required value="@Model.Title" />
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label"> Description</label>
+                            <textarea name="Description" class="form-control" rows="3" placeholder="Enter Description" required>@Model.Description</textarea>
+                        </div>
+
+                        <!-- Difficulty -->
+                        <div class="mb-3">
+                            <label class="form-label"> Difficulty</label>
+                            <select name="Difficulty" class="form-control">
+                                <option value="">Select Difficulty level</option>
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+
+                        <!--Source-->
+                        <div class="mb-3">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="source" value="upload" checked />
+                                <label class="form-check-label">Upload Video</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="source" value="url" />
+                                <label class="form-check-label">Video Url</label>
+                            </div>
+                        </div>
+                        <!-- Video File -->
+                        <div id="uploadbox">
+                            <label class="form-label">Upload Video</label>
+                            <input type="file" name="VideoFile" class="form-control" accept="video/*" />
+                        </div>
+
+                        <div class="d-none" id="urlbox">
+                            <label class="form-label">Video Url</label>
+                            <input type="url" name="VideoUrl" class="form-control" placeholder="https://example.com/video.mp4" />
+                        </div>
+                        <br />
+                        <a class="btn btn-secondary btn-sm" href="/Workout/Videos">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-success btn-sm px-4">
+                            Upload
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+        document.addEventListener("DOMContentLoaded", function() {
+        const radios = document.querySelectorAll('input[name="source"]');
+        const uploadBox = document.getElementById("uploadbox");
+        const urlBox = document.getElementById("urlbox");
+
+        function toggleRequired() {
+            const selected = document.querySelector('input[name="source"]:checked').value;
+            if (selected === "upload") {
+                uploadBox.classList.remove("d-none");
+                urlBox.classList.add("d-none");
+                uploadBox.querySelector("input").required = true;
+                urlBox.querySelector("input").required = false;
+            } else {
+                uploadBox.classList.add("d-none");
+                urlBox.classList.remove("d-none");
+                uploadBox.querySelector("input").required = false;
+                urlBox.querySelector("input").required = true;
+            }
+        }
+
+        // Run once on page load
+        toggleRequired();
+
+        // Run on radio change
+        radios.forEach(r => r.addEventListener("change", toggleRequired));
+    });
+
+</script>

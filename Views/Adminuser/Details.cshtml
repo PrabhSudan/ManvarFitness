@@ -1,0 +1,27 @@
+﻿@model ManvarFitness.Entity.AdminUser
+@{
+}
+<h1>User Details</h1>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">User ID: @Model.Id</h5>
+
+        <p class="card-text">
+            <strong>Name:</strong> @Model.EmailUsername
+        </p>
+
+        <p class="card-text">
+            <strong>Email:</strong> @Model.Password
+        </p>
+
+        <p class="card-text">
+            <strong>Phone:</strong> @Model.CountryCode
+        </p>
+        <p class="card-text">
+            <strong>Phone:</strong> @Model.Mobile
+        </p>
+
+        <a class="btn btn-primary" href="/Result/Index">Back</a>
+    </div>
+</div>

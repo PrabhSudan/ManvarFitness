@@ -1,9 +1,22 @@
-﻿@{
+﻿@model IEnumerable<ManvarFitness.Entity.WorkoutVideo>
+<style>
+    .form-check-input {
+        background-color: #ccc; /* OFF gray */
+        border-radius: 1rem; /* Bootstrap default */
+        transition: background-color 0.4s;
+    }
+
+        .form-check-input:checked {
+            background-color: #FF7F11; /* ON orange */
+        }
+</style>
+
+@{
     ViewData["Title"] = "Workout Videos";
-    var videos = ViewBag.Videos as List<dynamic>;
 }
  <h1 class="fw-semibold mb-0" style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">Workout Videos</h1>
 <div class="container-fluid">
+    @Html.AntiForgeryToken()
     <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
         
         <a asp-controller="Workout"
@@ -13,17 +26,16 @@
         </a>
     </div><br />
     <div class="row">
-        @foreach (var video in videos)
+        @foreach (var video in Model)
         {
             <div class="col-md-4 mb-4">
                 <div class="card shadow-sm">
                     <div class="card-body text-center p-2">
                         <div class="border mb-3" style="height:160px;">
-                            @if(!string.IsNullOrEmpty(video.FileName))
-                            {
+                            @if (!string.IsNullOrEmpty(video.VideoUrl))
+                                        {
                                 <video controls class="w-100 h-100" style="object-fit:cover;">
-                                    <source src="~/uploads/@video.FileName" type="video/mp4"/>
-                                    Your browser does not support the video tag.
+                                    <source src="@video.VideoUrl" type="video/mp4" />
                                 </video>
                             }
                             else
@@ -38,14 +50,105 @@
                         <p class="text-start mb-0">
                             <small><b>Difficulty:</b>  @video.Difficulty</small><br />
                             <small><b>Status:</b>
-                                <span class="@(video.Status == "Active" ? "text-success" : "text-danger")">
+                                <span class="@(video.IsActive ? "text-success" : "text-danger")">
                                     @video.Status
                                 </span>
                             </small>
                         </p>
+                        <br />
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       role="switch"
+                                       data-videoid="@video.Id"
+                                       id="switchVideo@video.Id"
+                                       @(video.Status == "Active" ? "checked" : "") />
+                                <label class="form-check-label" for="switchVideo@video.Id"></label>
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-sm"
+                                    style="color:#FF7F11;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal"
+                                    onclick="setDeleteId(@video.Id)">
+                                <i class="bi bi-trash-fill fs-5"></i>
+                            </button>
+
+                        </div>
+                        
                     </div>
                 </div>
             </div>
         }
     </div>
 </div>
+<script>
+    function toggleVideoStatus(el) {
+        const videoId = el.getAttribute('data-videoid');
+        const isActive = el.checked;
+
+        fetch(`/Workout/ToggleStatus/${videoId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isActive: isActive })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                alert('Failed to update status.');
+                el.checked = !isActive; // revert toggle if failed
+            } else {
+                // Update status text dynamically
+                const statusSpan = el.closest('.card-body').querySelector('small span');
+                statusSpan.textContent = isActive ? 'Active' : 'Inactive';
+                statusSpan.className = isActive ? 'text-success' : 'text-danger';
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            el.checked = !isActive; // revert on error
+        });
+    }
+
+    // Attach event to all switches
+    document.querySelectorAll(".form-check-input").forEach(switchEl => {
+        switchEl.addEventListener("change", function() {
+            toggleVideoStatus(this);
+        });
+    });
+
+           var selectedVideoId = 0;
+
+    function setDeleteId(id) {
+        selectedVideoId = id;
+    }
+
+    function deleteVideo() {
+
+        fetch('/Workout/SoftDelete?id=' + selectedVideoId, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken':
+                    document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert("Delete failed");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error occurred");
+        });
+    }
+
+</script>
+<partial name="_DeletePartialView" />
+

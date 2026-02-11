@@ -65,12 +65,12 @@
                     <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usersSubmenu">
                         Users
                     </a>
-                    <ul class="collapse list-unstyled ps-3 @(currentController == "User" || currentController == "UserRoles" || currentController == "UserActivity" ? "show" : "")" id="usersSubmenu">
+                    <ul class="collapse list-unstyled ps-3 @(currentController == "User" || currentController == "AdminUser" || currentController == "UserActivity" ? "show" : "")" id="usersSubmenu">
                         <li class="@(currentController == "User" ? "active" : "")">
                             <a asp-controller="User" asp-action="Index">All Users</a>
                         </li>
-                        <li class="@(currentController == "UserRoles" ? "active" : "")">
-                            <a asp-controller="UserRoles" asp-action="Index">Roles</a>
+                        <li class="@(currentController == "AdminUser" ? "active" : "")">
+                            <a asp-controller="AdminUser" asp-action="Index">AdminUsers</a>
                         </li>
                         <li class="@(currentController == "UserActivity" ? "active" : "")">
                             <a asp-controller="UserActivity" asp-action="Index">Activity Log</a>
@@ -114,7 +114,7 @@
                     <a asp-controller="Herbs" asp-action="Index">Herbs</a>
                 </li>
 
-                <li class="dropdown-li@(currentController == "Revenue" || currentController == "Meditation" ? "activeparent" : "")">
+                <li class="dropdown-li@(currentController == "Revenue" || currentController == "Payments" ? "activeparent" : "")">
                     <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#revenueSubmenu">
                         Revenue
                     </a>
@@ -165,7 +165,7 @@
                     revenueSubmenu.classList.add("show");
                 }
             }
-             if ('@currentController' == "User" || currentController == "UserRoles" || currentController == "UserActivity" ) {
+             if ('@currentController' == "User" || currentController == "AdminUser" || currentController == "UserActivity" ) {
                 const usersSubmenu = document.getElementById("usersSubmenu");
                 if (usersSubmenu) {
                     usersSubmenu.classList.add("show");
@@ -175,6 +175,8 @@
     </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
 
     @await RenderSectionAsync("Scripts", required: false)
 

@@ -1,0 +1,134 @@
+﻿@model IEnumerable<ManvarFitness.Entity.AdminUser>
+<style>
+    /* OFF state */
+    .form-check-input {
+        background-color: #ccc; /* gray when OFF */
+        border-radius: 1rem; /* keep default Bootstrap rounded */
+        transition: background-color 0.4s;
+    }
+
+        /* ON state */
+        .form-check-input:checked {
+            background-color: #FF7F11; /* orange when ON */
+        }
+</style>
+
+<h1 class="fw-semibold mb-0" style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">Admin Users</h1>
+<div class="container-fluid px-4">
+
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <a asp-controller="AdminUser"
+           asp-action="Create"
+           class="btn btn-success px-4 py-2 fw-semibold">
+            Add New User
+        </a>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="row mb-3 g-2">
+        <div class="col-lg-3 col-md-4">
+            <input type="text" id="searchPlan"
+                   class="form-control w-100"
+                   placeholder="Search User..." />
+        </div>
+
+        
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="d-none d-md-table-cell">ID</th>
+                    <th>EmailUsername</th>
+                    <th class="d-none d-md-table-cell">Password</th>
+                    <th>Mobile</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td class="d-none d-md-table-cell">@user.Id</td>
+                        <td >@user.EmailUsername</td>
+                        <td class="d-none d-md-table-cell position relative">
+                            <span id="password-@user.Id"class="masked-password">
+                                ••••••••
+                            </span>
+                        </td>
+                        <td>
+                            <span class="fw-semibold">@user.CountryCode</span>
+                            <span>@user.Mobile</span>
+                        </td>
+
+                        <td>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" data-userid="@user.Id"
+                                       @(user.IsActive ? "checked" : "") >
+                                <label class="form-check-label" for="switchCheckDefault"></label>
+                            </div>
+
+
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a class="btn btn-warning btn-sm" asp-action="Details" asp-route-id="@user.Id">Details</a>
+                                <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@user.Id">Edit</a>
+                                <a class="btn btn-warning btn-sm" asp-action="Delete" asp-route-id="@user.Id">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const searchPlan = document.getElementById("searchPlan");
+    const rows = document.querySelectorAll("table tbody tr");
+
+    function filterUsers() {
+        const searchText = searchPlan.value.toLowerCase();
+        rows.forEach(row => {
+            const matchesSearch = row.innerText.toLowerCase().includes(searchText);
+
+            row.style.display =
+                matchesSearch ? "" : "none";
+        });
+    }
+
+    searchPlan.addEventListener("keyup", filterUsers);
+        function togglePhone(el) {
+        const userId = el.getAttribute('data-userid');
+        const isActive = el.checked;
+
+        fetch(`/AdminUser/ToogleActive/${userId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isActive })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                alert('Failed to update status.');
+                el.checked = !isActive; // revert toggle if failed
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            el.checked = !isActive; // revert on error
+        });
+    }
+
+    // Attach event to all switches dynamically
+    document.querySelectorAll(".form-check-input").forEach(switchEl => {
+        switchEl.addEventListener("change", function() {
+            togglePhone(this);
+        });
+    });
+
+</script>

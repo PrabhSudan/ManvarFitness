@@ -1,38 +1,32 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ManvarFitness.Database;
+using ManvarFitness.Entity;
+using ManvarFitness.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ManvarFitness.Controllers
 {
+
     public class WorkoutController : Controller
     {
-        private readonly string uploadfolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-        
-        public WorkoutController()
+        private readonly ApplicationDbContext _context;
+        private readonly string uploadfolder;
+
+        public WorkoutController(ApplicationDbContext context)
         {
-            if(!Directory.Exists(uploadfolder))
+            _context = context;
+            uploadfolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+
+            if (!Directory.Exists(uploadfolder))
                 Directory.CreateDirectory(uploadfolder);
         }
         public IActionResult Videos()
         {
-            var Videos = new List<dynamic>
-            {
-                //new { Title = "Full Body Workout",Description="Descrip1", Difficulty="Easy",Status="Active", FileName=""},
-                //new { Title = "Yoga for Beginners", Description="Descrip2", Difficulty="Medium",Status="Active", FileName="" },
-                //new { Title = "HIIT Session", Description="Descrip3", Difficulty="Hard",Status="Active", FileName="" }
-            };
-            var uploadedFiles = Directory.GetFiles(uploadfolder)
-                .Select(f => Path.GetFileName(f))
-                .Select(f => new
-                {
-                    Title = Path.GetFileNameWithoutExtension(f),
-                    Description = "Uploaded Video",
-                    Difficulty = "Custom",
-                    Status = "Active",
-                    FileName = f
-                });
-            Videos.AddRange(uploadedFiles);
+            var videos = _context.WorkoutVideos
+               .Where(v => !v.IsDeleted)
+               .OrderByDescending(v => v.Title)
+               .ToList();
 
-            ViewBag.Videos = Videos;
-            return View();
+            return View(videos);
         }
 
         [HttpGet]
@@ -43,22 +37,70 @@ namespace ManvarFitness.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Upload(string Title, string Description, string Difficulty, IFormFile videofile)
+        public IActionResult Upload(WorkoutVideoModel model)
         {
-            if(string.IsNullOrEmpty(Title) || videofile==null)
+            if (!ModelState.IsValid)
             {
-                ViewBag.Error = "Title and Video file are required";
-                return View();
+                return View(model);
             }
 
-            var filePath = Path.Combine(uploadfolder, videofile.FileName);
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            if (model.VideoFile == null && string.IsNullOrWhiteSpace(model.VideoUrl))
             {
-                videofile.CopyTo(stream);
+                ModelState.AddModelError("", "Please upload a video or provide a video URL");
+                return View(model);
             }
 
+            if (model.VideoFile != null)
+            {
+                ;
+                var fileName = Guid.NewGuid() + Path.GetExtension(model.VideoFile.FileName);
+                var filePath = Path.Combine(uploadfolder, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                model.VideoFile.CopyTo(stream);
+
+                model.VideoUrl = "/uploads/" + fileName;
+            }
+
+            var entity = new WorkoutVideo
+            {
+                Title = model.Title,
+                Description = model.Description,
+                Difficulty = model.Difficulty,
+                IsActive = model.IsActive,
+                VideoUrl = model.VideoUrl,
+                CreatedOn = DateTime.UtcNow
+            };
+            _context.WorkoutVideos.Add(entity);
+            _context.SaveChanges();
             TempData["Success"] = "Video uploaded successfully";
-            return RedirectToAction("Videos");
+            return RedirectToAction("Videos", "Workout");
+        }
+
+        [HttpPost]
+        public IActionResult ToggleStatus(int id, [FromBody] WorkoutVideoModel model)
+        {
+            var video = _context.WorkoutVideos.Find(id);
+            if (video == null)
+                return Json(new { success = false });
+
+            video.IsActive = model.IsActive;
+            _context.SaveChanges();
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SoftDelete(int id)
+        {
+            var video = _context.WorkoutVideos.Find(id);
+            if(video == null)
+            {
+                return Json(new { success = false });
+            }
+            video.IsDeleted = true;
+            _context.SaveChanges();
+            return Json(new { success = true });
         }
     }
 }

@@ -386,3 +386,47 @@ table {
     font-size: 1.1rem;
     border-bottom: 1px solid #e0e0e0; /* optional separator */
 }
+
+/*For Admin Users*/
+.toggle-button {
+    transition: all 0.3s ease;
+    font-size: 16px; /* adjust text size */
+    border-radius: 12px; /* rounded but not too tall */
+    padding: 5px 25px; /* shorter height, longer width */
+    min-width: 30px; /* minimum width */
+    height: 12px; /* fixed short height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* icon/text color */
+    cursor: pointer;
+}
+
+.button-success {
+    background-color: green;
+    border: 1px solid green;
+}
+
+.btn-secondary {
+    background-color: #ccc;
+    border: 1px solid #aaa;
+}
+
+.toggle-button i {
+    margin-right: 5px; /* space between icon and text */
+    font-size: 18px; /* icon size */
+}
+
+.table-responsive td,
+.table-responsive th {
+    white-space: normal !important; /* allow wrapping */
+    word-wrap: break-word; /* break long words */
+    overflow-wrap: break-word; /* modern standard */
+}
+
+.btn:focus,
+.btn:active,
+.btn:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
+}
