@@ -1,0 +1,240 @@
+﻿@using Microsoft.AspNetCore.Html
+@model ManvarFitness.Models.DietPlanModel
+
+@{
+    ViewData["Title"] = "Diet Plan Details - " + Model.Name;
+
+    var alldays = new List<string> { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+    // Helper function to render lists
+    Func<List<string>, IHtmlContent> RenderList = items =>
+    {
+        if (items == null || !items.Any()) return Html.Raw("-");
+        var ul = "<ol>";
+        foreach (var item in items)
+            ul += $"<li>{item}</li>";
+        ul += "</ol>";
+        return Html.Raw(ul);
+    };
+
+}
+<style>
+    .table th {
+        vertical-align: text-top;
+        padding: 18px;
+        text-align:center;
+    }
+    .table td{
+        vertical-align: top;
+        text-align: left;
+        line-padding:1px;
+    }
+
+    .diet-table {
+        min-width: 350px; /* force horizontal scroll */
+    }
+
+        .diet-table th,
+        .diet-table td {
+            min-width: 200px; /* increase column width */
+        }
+       
+</style>
+@Html.AntiForgeryToken()
+<h2>@ViewData["Title"]</h2>
+
+<div style="overflow-x: auto;">
+    <table class="table table-bordered diet-table" >
+        <thead class="table-light">
+            <tr >
+                <th>Day</th>
+                <th>Empty Stomach</th>
+                <th>Early Morning Snack</th>
+                <th>Exercise</th>
+                <th>Breakfast</th>
+                <th>Mid Morning Snack</th>
+                <th>Lunch</th>
+                <th>Evening Snack</th>
+                <th>Dinner</th>
+                <th>Bedtime</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody class="top-0" id="diet-body">
+            @for (int i = 0; i < Model.DayName.Count; i++)
+            {
+                var currentDay = Model.DayName[i];
+                <tr>
+                    
+                   <td>
+                        <select class="day-dropdown">
+                            <option value="">Select Day</option>
+                            @foreach (var day in alldays)
+                            {
+                                var selected = day == currentDay ? "selected" : null;
+                                <option value="@day" selected="@(day ! ==  currentDay ? "selected" : null)" >@day</option>
+                            }
+                        </select>
+                   </td>
+                    <td contenteditable="true">@RenderList(Model.EmptyStomach)</td>
+                    <td contenteditable="true">@RenderList(Model.EarlyMorningSnack)</td>
+                    <td contenteditable="true">@RenderList(Model.Exercise)</td>
+                    <td contenteditable="true">@RenderList(Model.Breakfast)</td>
+                    <td contenteditable="true">@RenderList(Model.MidMorningSnack)</td>
+                    <td contenteditable="true">@RenderList(Model.Lunch)</td>
+                    <td contenteditable="true">@RenderList(Model.EveningSnack)</td>
+                    <td contenteditable="true">@RenderList(Model.Dinner)</td>
+                    <td contenteditable="true">@RenderList(Model.Bedtime)</td>
+                    <td contenteditable="true">@Html.Raw(Model.Description ?? "-")</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
+<br />
+<button type="button"  id="row-add" class="btn btn-success btn-sm px-4">
+        Replicate
+</button>
+
+<button type="button" id="savediet" class="btn btn-success btn-sm px-4">
+    Save
+</button>
+
+<a class="btn btn-secondary btn-sm px-4" asp-action="Index" asp-controller="DietPlan">Back</a>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const tableBody = document.getElementById("diet-body");
+        let selectedRow = null;
+
+        // Row selection
+        tableBody.addEventListener("click", function (e) {
+            const row = e.target.closest("tr");
+            if (!row) return;
+
+            if (selectedRow) selectedRow.classList.remove("selected");
+            row.classList.add("selected");
+            selectedRow = row;
+        });
+
+        // Helper: get all used days except for a specific row
+        function getUsedDays(exceptRow) {
+            const used = [];
+            document.querySelectorAll("#diet-body tr").forEach(row => {
+                if (row === exceptRow) return;
+                const select = row.querySelector(".day-dropdown");
+                if (select && select.value) used.push(select.value);
+            });
+            return used;
+        }
+
+        // Helper: populate dropdown options dynamically
+        function populateDropdown(dropdown, currentValue) {
+            const alldays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            const usedDays = getUsedDays(dropdown.closest("tr"));
+
+            dropdown.innerHTML = '<option value="">Select Day</option>'; // reset
+
+            alldays.forEach(day => {
+                if (!usedDays.includes(day) || day === currentValue) {
+                    const option = document.createElement("option");
+                    option.value = day;
+                    option.text = day;
+                    if (day === currentValue) option.selected = true;
+                    dropdown.appendChild(option);
+                }
+            });
+        }
+
+        // On page load: update all dropdowns to remove used days
+        document.querySelectorAll(".day-dropdown").forEach(dd => {
+            const currentValue = dd.value;
+            populateDropdown(dd, currentValue);
+        });
+
+        // Replicate row
+        document.getElementById("row-add").addEventListener("click", function () {
+            if (!selectedRow) {
+                alert("Please select a row to replicate!");
+                return;
+            }
+
+            const newRow = selectedRow.cloneNode(true);
+
+            // Reset dropdown value for new row
+            const daySelect = newRow.querySelector(".day-dropdown");
+            if (daySelect) daySelect.value = "";
+
+            // Append row first
+            tableBody.appendChild(newRow);
+
+            // Populate dropdown dynamically to exclude used days
+            if (daySelect) populateDropdown(daySelect, "");
+
+            // Scroll into view and focus dropdown
+            newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (daySelect) daySelect.focus();
+        });
+
+        // Save button
+        document.getElementById("savediet").addEventListener("click", function () {
+
+            const rows = document.querySelectorAll("#diet-body tr");
+            const dietData = [];
+
+            rows.forEach(row => {
+                // Helper: get cell data (list items)
+                const getCellData = (cellIndex) => {
+                    const listItems = row.cells[cellIndex].querySelectorAll('li');
+                    return listItems.length > 0
+                        ? Array.from(listItems).map(li => li.innerText.trim())
+                        : [row.cells[cellIndex].innerText.trim()];
+                };
+
+                // Helper: get dropdown value for DayName
+                const getDayName = (cellIndex) => {
+                    const select = row.cells[cellIndex].querySelector('select');
+                    return select ? select.value : row.cells[cellIndex].innerText.trim();
+                };
+
+                dietData.push({
+                    Id: 0,
+                    Name: "@Model.Name",
+                    DayName: [getDayName(0)],           // only DayName from dropdown
+                    EmptyStomach: getCellData(1),
+                    EarlyMorningSnack: getCellData(2),
+                    Exercise: getCellData(3),
+                    Breakfast: getCellData(4),
+                    MidMorningSnack: getCellData(5),
+                    Lunch: getCellData(6),
+                    EveningSnack: getCellData(7),
+                    Dinner: getCellData(8),
+                    Bedtime: getCellData(9),
+                    Description: row.cells[10].innerText.trim(),
+                    IsActive: true
+                });
+            });
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('/DietPlan/SaveDietPlan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify(dietData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) alert("Diet plan saved successfully!");
+                else alert("Failed to save diet plan!");
+            })
+            .catch(err => console.error(err));
+        });
+
+    });
+</script>
+
+ 

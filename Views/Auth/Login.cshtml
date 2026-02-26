@@ -7,6 +7,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
     <title>@ViewData["Title"]</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,7 +24,8 @@
         }
 
         .login-card {
-            width: 380px;
+            width : 100%
+            max-width: 420px;
             background: #fff;
             border-radius: 12px;
             padding: 32px;
@@ -76,31 +78,56 @@
             text-decoration: none;
             font-size: 14px;
         }
-    </style>
+        /* ======================= MOBILE ADJUSTMENTS ======================= */
+        @@media (max-width: 576px) {
+            .login-card
+
+        {
+            padding: 24px;
+        }
+
+        .brand {
+            font-size: 20px;
+            flex-direction: column;
+        }
+
+            .brand img {
+                height: 60px;
+            }
+
+        .btn-login {
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        }</style>
 </head>
 
 <body>
     <div class="login-card">
         <div class="brand">
             <img src="~/img/IMG_5797.JPG (1).jpeg" alt="Logo" style="height:70px; width:auto;" />
-            Manvar Fitness
+            Manwar Fitness
         </div>
 
-        <form asp-controller="Auth" asp-action="Login" method="post">
+        <form asp-controller="Auth" asp-action="Login" method="post" autocomplete="off">
             @if (ViewBag.Error != null)
             {
                 <div class="alert alert-warning text-center">
                     @ViewBag.Error
                 </div>
             }
+            <!-- Edge autofill blocker -->
+            <input type="text" name="fakeusernameremembered" style="display:none">
+            <input type="password" name="fakepasswordremembered" style="display:none">
 
             <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="email" name="emailUsername" placeholder="Email or Username" required>
-                <label for="username">Email or Username</label>
+                <input type="text" class="form-control" id="email" name="emailUsername"  placeholder="Email or Username" autocomplete="email" required>
+                <label for="emailUsername">Email or Username</label>
             </div>
 
             <div class="form-floating mb-3 position-relative">
-                <input type="password" class="form-control" id="password" name="Password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7"; required>
+                <input type="password" class="form-control" id="password" name="Password" placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7" ; autocomplete="password" required>
                 <label for="password">Password</label>
                 <span class="position-absolute top-50 end-0 translate-middle-y pe-3 cursor-pointer" onclick="togglePassword('password','eyeIcon1')">
                 </span>

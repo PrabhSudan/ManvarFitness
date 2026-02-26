@@ -1,0 +1,136 @@
+﻿@model IEnumerable<ManvarFitness.Entity.Concerns>
+<style>
+    /* OFF state */
+    .form-check-input {
+        background-color: #ccc; /* gray when OFF */
+        border-radius: 1rem; /* keep default Bootstrap rounded */
+        transition: background-color 0.4s;
+    }
+
+        /* ON state */
+        .form-check-input:checked {
+            background-color: #FF7F11; /* orange when ON */
+        }
+</style>
+<h2 class="fw-semibold mb-0"
+    style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">
+    Manage Categories
+</h2>
+<br />
+<br />
+
+<a class="btn btn-primary mb-3" asp-controller="ConcernCategory" asp-action="Create">Add Category</a>
+<form id="antiForgeryForm" method="post">
+    @Html.AntiForgeryToken()
+</form>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th style="width:80%">Category</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in Model)
+        {
+            <tr>
+                <td>@category.Name</td>
+                <td>
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               role="switch"
+                               data-categoryid="@category.ConcernId"
+                               id="switchCategory@category.Id"
+                               @(category.IsActive ? "checked" : "") />
+                        <label class="form-check-label" for="switchCategory@category.Id"></label>
+                    </div>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button type="button"
+                                class="btn btn-sm"
+                                style="color:#FF7F11;"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal"
+                                onclick="setDeleteId(@category.ConcernId)">
+                            <i class="bi bi-trash-fill fs-5"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-danger" onclick="deleteCategory()">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var selectedCategoryId = 0;
+
+    // Called when clicking the trash icon
+    function setDeleteId(id) {
+        selectedCategoryId = id;
+    }
+
+    // Called when clicking Delete in modal
+    function deleteCategory() {
+        if (selectedCategoryId === 0) {
+            alert("Invalid category ID");
+            return;
+        }
+
+        // Get anti-forgery token
+        var tokenInput = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]');
+        if (!tokenInput) {
+            alert("Anti-forgery token not found.");
+            return;
+        }
+
+        var token = tokenInput.value;
+
+        fetch('/ConcernCategory/SoftDelete?id=' + selectedCategoryId, {
+            method: 'POST',
+            headers: {
+                'RequestVerificationToken': token
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Close modal
+                var modalEl = document.getElementById('deleteModal');
+                var modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+
+                location.reload();
+            } else {
+                alert("Delete failed");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error occurred: " + err);
+        });
+    }
+</script>

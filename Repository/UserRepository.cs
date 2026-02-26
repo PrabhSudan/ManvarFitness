@@ -1,5 +1,6 @@
 ﻿using ManvarFitness.Database;
 using ManvarFitness.Entity;
+using ManvarFitness.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace ManvarFitness.Repository
@@ -22,5 +23,7 @@ namespace ManvarFitness.Repository
             _context.AdminUsers.Update(user);
             await _context.SaveChangesAsync();
         }
+
+
     }
 }

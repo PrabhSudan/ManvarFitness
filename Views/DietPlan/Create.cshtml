@@ -1,0 +1,150 @@
+﻿@model ManvarFitness.Entity.DietPlan
+@{
+    ViewData["Title"] = "Add Plan";
+}
+
+<h1>Create Plan</h1>
+
+<form method="post" asp-action="Create" asp-controller="DietPlan" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <!-- Name (static) -->
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Name</label>
+        <input type="text" name="Name" class="form-control" required />
+    </div>
+
+    <!-- DayName (dynamic now) -->
+    <div class="mb-3" style="max-width: 400px;">
+        <label>DayName</label>
+        <div class="dynamic-container" data-fieldname="DayName">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="DayName[0]" class="form-control" placeholder="DayName" required />
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Fields -->
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Empty Stomach</label>
+        <div class="dynamic-container" data-fieldname="EmptyStomach">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="EmptyStomach[0]" class="form-control" placeholder="Empty Stomach" required />
+                <button type="button" class="btn btn-success btn-sm add-field">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Early Morning Snack</label>
+        <div class="dynamic-container" data-fieldname="EarlyMorningSnack">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="EarlyMorningSnack[0]" class="form-control" placeholder="Early Morning Snack" />
+                <button type="button" class="btn btn-success btn-sm add-field">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Exercise</label>
+        <div class="dynamic-container" data-fieldname="Exercise">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="Exercise[0]" class="form-control" placeholder="Exercise" />
+                <button type="button" class="btn btn-success btn-sm add-field">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Breakfast</label>
+        <div class="dynamic-container" data-fieldname="Breakfast">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="Breakfast[0]" class="form-control" placeholder="Breakfast" />
+                <button type="button" class="btn btn-success btn-sm add-field">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Mid Morning Snack</label>
+        <div class="dynamic-container" data-fieldname="MidMorningSnack">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="MidMorningSnack[0]" class="form-control" placeholder="Mid Morning Snack" />
+                <button type="button" class="btn btn-success btn-sm add-field">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Lunch</label>
+        <div class="dynamic-container" data-fieldname="Lunch">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="Lunch[0]" class="form-control" placeholder="Lunch" />
+                <button type="button" class="btn btn-success btn-sm add-field">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Evening Snack</label>
+        <div class="dynamic-container" data-fieldname="EveningSnack">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="EveningSnack[0]" class="form-control" placeholder="Evening Snack" />
+                <button type="button" class="btn btn-success btn-sm add-field">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Dinner</label>
+        <div class="dynamic-container" data-fieldname="Dinner">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="Dinner[0]" class="form-control" placeholder="Dinner" />
+                <button type="button" class="btn btn-success btn-sm add-field">+</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Bedtime</label>
+        <div class="dynamic-container" data-fieldname="Bedtime">
+            <div class="field-item mb-2 d-flex align-items-center gap-2">
+                <input type="text" name="Bedtime[0]" class="form-control" placeholder="Bedtime" />
+                <button type="button" class="btn btn-success btn-sm add-field">+</button>
+            </div>
+        </div>
+    </div>
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Description</label>
+        <input type="text" name="Description" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-success">Create Plan</button>
+    <a class="btn btn-secondary" asp-action="Index" asp-controller="DietPlan">Back</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelectorAll(".add-field").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const container = this.closest(".dynamic-container");
+                const fieldName = container.dataset.fieldname;
+                const index = container.querySelectorAll("input").length;
+
+                const newField = document.createElement("div");
+                newField.className = "field-item mb-2 d-flex align-items-center gap-2";
+                newField.innerHTML = `
+                    <input type="text" name="${fieldName}[${index}]" class="form-control" placeholder="${fieldName}" />
+                    <button type="button" class="btn btn-danger btn-sm remove-field">-</button>
+                `;
+                container.appendChild(newField);
+
+                // Remove button
+                newField.querySelector(".remove-field").addEventListener("click", function () {
+                    newField.remove();
+                });
+            });
+        });
+    </script>
+}

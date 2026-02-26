@@ -1,0 +1,97 @@
+﻿@{
+    ViewBag.Title = "Role Pages";
+}
+
+<h2>Select Role</h2>
+
+<select id="roleDropdown" class="form-select">
+    <option value="">--Select Role--</option>
+    @foreach (var role in ViewBag.Roles)
+    {
+        <option value="@role">@role</option>
+    }
+</select><br /><br />
+
+
+
+<form asp-action="SaveRolePages" method="post">
+    <input type="hidden" id="selectedRole" name="roleName" />
+
+    <div id="pagesContainer">
+        @* Partial view will load here *@
+    </div>
+
+    <button type="submit">Save</button>
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        // ==============================
+        // LOAD PAGES WHEN ROLE CHANGES
+        // ==============================
+        $('#roleDropdown').change(function () {
+
+            var roleName = $(this).val();
+
+            // Set hidden field for form post
+            $('#selectedRole').val(roleName);
+
+            if (roleName) {
+                $.ajax({
+                    url: '@Url.Action("GetPages", "RoleMenu")',
+                    type: 'POST',
+                    data: { roleName: roleName },
+                    success: function (data) {
+                        $('#pagesContainer').html(data);
+                    },
+                    error: function () {
+                        alert("Error loading pages.");
+                    }
+                });
+            }
+            else {
+                $('#pagesContainer').html('');
+            }
+        });
+
+
+        // ======================================
+        // PARENT CHECKBOX → TOGGLE ALL CHILDREN
+        // ======================================
+        $(document).on('change', '.parent-checkbox', function () {
+
+            var parentId = $(this).data('id');
+            var isChecked = $(this).is(':checked');
+
+            $('.sub-checkbox-' + parentId).prop('checked', isChecked);
+        });
+
+
+        // ======================================
+        // CHILD CHECKBOX → AUTO CHECK PARENT
+        // ======================================
+        $(document).on('change', '.form-check-input', function () {
+
+            $('.parent-checkbox').each(function () {
+
+                var parentId = $(this).data('id');
+                var children = $('.sub-checkbox-' + parentId);
+
+                if (children.length > 0) {
+
+                    var allChecked = children.filter(':checked').length === children.length;
+
+                    $(this).prop('checked', allChecked);
+                }
+            });
+
+        });
+
+    });
+</script>
+
+
+

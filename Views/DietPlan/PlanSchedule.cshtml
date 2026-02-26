@@ -1,0 +1,39 @@
+﻿@model IEnumerable<ManvarFitness.Entity.DietPlan>
+
+<h1>Diet Plan Schedule</h1>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped text-center">
+        <thead class="table-light">
+            <tr>
+                <th>EmptyStomach</th>
+                <th>Early Morning Snack</th>
+                <th>Exercise</th>
+                <th>Breakfast</th>
+                <th>Mid Morning Snack</th>
+                <th>Lunch</th>
+                <th>Evening Snack</th>
+                <th>Dinner</th>
+                <th>Bedtime</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var plan in Model)
+            {
+                <tr>
+                    <td>Day @plan.EmptyStomach</td>
+                    <td>@plan.EarlyMorningSnack</td>
+                    <td>@plan.Exercise</td>
+                    <td>@plan.Breakfast</td>
+                    <td>@plan.MidMorningSnack</td>
+                    <td>@plan.Lunch</td>
+                    <td>@plan.EveningSnack</td>
+                    <td>@plan.Dinner</td>
+                    <td>@plan.Bedtime</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">Back to List</a>

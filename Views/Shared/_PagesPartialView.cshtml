@@ -1,0 +1,104 @@
+﻿@model List<ManvarFitness.Models.PageModel>
+
+@{
+    var assignedIds = ViewBag.AssignedIds as List<int> ?? new List<int>();
+}
+
+@if (Model != null && Model.Any())
+{
+    foreach (var parent in Model)
+    {
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <div class="form-check">
+                    @if (parent.SubPages != null && parent.SubPages.Any())
+                    {
+                        <input type="checkbox"
+                               class="form-check-input parent-checkbox"
+                               id="parent_@parent.Id"
+                               data-id="@parent.Id"
+                               @(parent.SubPages.All(sp => assignedIds.Contains(sp.Id)) ? "checked" : "") />
+
+                        <label class="form-check-label fw-bold"
+                               for="parent_@parent.Id">
+                            @parent.Name
+                        </label>
+                    }
+                    else
+                    {
+                        <input type="checkbox"
+                               name="selectedPageIds"
+                               value="@parent.Id"
+                               class="form-check-input"
+                               id="page_@parent.Id"
+                               @(assignedIds.Contains(parent.Id) ? "checked" : "") />
+
+                        <label class="form-check-label fw-bold"
+                               for="page_@parent.Id">
+                            @parent.Name
+                        </label>
+                    }
+
+                </div>
+            </div>
+
+            @if (parent.SubPages != null && parent.SubPages.Any())
+            {
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var sub in parent.SubPages)
+                        {
+                            <div class="col-md-3 mb-2">
+                                <div class="form-check">
+
+                                    <input type="checkbox"
+                                           name="selectedPageIds"
+                                           value="@sub.Id"
+                                           class="form-check-input sub-checkbox-@parent.Id"
+                                           id="page_@sub.Id"
+                                           @(assignedIds.Contains(sub.Id) ? "checked" : "") />
+
+                                    <label class="form-check-label"
+                                           for="page_@sub.Id">
+                                        @sub.Name
+                                    </label>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            // Parent toggles all children
+            $('.parent-checkbox').change(function () {
+                var parentId = $(this).data('id');
+                var isChecked = $(this).is(':checked');
+                $('.sub-checkbox-' + parentId).prop('checked', isChecked);
+            });
+
+            // Auto check/uncheck parent based on children
+            $('.form-check-input').change(function () {
+
+                $('.parent-checkbox').each(function () {
+                    var parentId = $(this).data('id');
+                    var children = $('.sub-checkbox-' + parentId);
+
+                    if (children.length > 0) {
+                        var allChecked = children.filter(':checked').length === children.length;
+                        $(this).prop('checked', allChecked);
+                    }
+                });
+
+            });
+
+        });
+    </script>
+}

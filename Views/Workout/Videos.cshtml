@@ -33,28 +33,51 @@
                     <div class="card-body text-center p-2">
                         <div class="border mb-3" style="height:160px;">
                             @if (!string.IsNullOrEmpty(video.VideoUrl))
-                                        {
-                                <video controls class="w-100 h-100" style="object-fit:cover;">
-                                    <source src="@video.VideoUrl" type="video/mp4" />
-                                </video>
-                            }
-                            else
                             {
-                                <div class="d-flex align-items-center justify-content-center text-muted h-100">
-                                    Video Preview
-                                </div>
+                                if (video.VideoUrl.Contains("youtu"))
+                                {
+                                    string videoId = "";
+
+                                    if (video.VideoUrl.Contains("watch?v="))
+                                    {
+                                        videoId = video.VideoUrl.Split("watch?v=").Last();
+                                    }
+                                    else if (video.VideoUrl.Contains("youtu.be/"))
+                                    {
+                                        videoId = video.VideoUrl.Split("youtu.be/").Last();
+                                    }
+
+                                    // Remove extra parameters like ?si=
+                                    if (videoId.Contains("?"))
+                                    {
+                                        videoId = videoId.Split("?")[0];
+                                    }
+
+                                    <iframe class="w-100 h-100"
+                                            src="https://www.youtube.com/embed/@videoId"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowfullscreen>
+                                    </iframe>
+                                }
+                                else
+                                {
+                                    <video controls class="w-100 h-100" style="object-fit:cover;">
+                                        <source src="@video.VideoUrl" type="video/mp4" />
+                                    </video>
+                                }
                             }
                         </div>
+                        <p class="fw-bold text-start mb-1">
+                            <b>Category:</b> @video.Category.ToString()
+                        </p>
                         <h6 class="fw-bold text-start">@video.Title</h6>
                         <p class="text-muted text-start mb-1">@video.Description</p>
                         <p class="text-start mb-0">
                             <small><b>Difficulty:</b>  @video.Difficulty</small><br />
-                            <small><b>Status:</b>
-                                <span class="@(video.IsActive ? "text-success" : "text-danger")">
-                                    @video.Status
-                                </span>
-                            </small>
+                           
                         </p>
+                       
                         <br />
                         <div class="d-flex justify-content-between align-items-center mt-2">
 
@@ -68,14 +91,23 @@
                                 <label class="form-check-label" for="switchVideo@video.Id"></label>
                             </div>
 
-                            <button type="button"
-                                    class="btn btn-sm"
-                                    style="color:#FF7F11;"
+                        <!-- Edit/Delete buttons on the right -->
+                        <div>
+                            <a asp-controller="Workout"
+                                   asp-action="Edit"
+                                   asp-route-id="@video.Id"
+                                   class="btn btn-sm me-1"
+                                   style="color:darkorange;">
+                                    <i class="bi bi-pencil-fill"></i>
+                            </a>
+
+                            <button type="button" class="btn btn-sm" style="color:darkorange;"
                                     data-bs-toggle="modal"
                                     data-bs-target="#deleteModal"
                                     onclick="setDeleteId(@video.Id)">
-                                <i class="bi bi-trash-fill fs-5"></i>
+                                <i class="bi bi-trash-fill"></i>
                             </button>
+                        </div>
 
                         </div>
                         
@@ -86,41 +118,35 @@
     </div>
 </div>
 <script>
-    function toggleVideoStatus(el) {
+        function toggleVideoStatus(el) {
         const videoId = el.getAttribute('data-videoid');
-        const isActive = el.checked;
 
         fetch(`/Workout/ToggleStatus/${videoId}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ isActive: isActive })
+            headers: {
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            }
         })
         .then(res => res.json())
         .then(data => {
-            if (!data.success) {
+            if(!data.success) {
                 alert('Failed to update status.');
-                el.checked = !isActive; // revert toggle if failed
-            } else {
-                // Update status text dynamically
-                const statusSpan = el.closest('.card-body').querySelector('small span');
-                statusSpan.textContent = isActive ? 'Active' : 'Inactive';
-                statusSpan.className = isActive ? 'text-success' : 'text-danger';
+                el.checked = !el.checked; // revert toggle
             }
         })
         .catch(err => {
             console.error(err);
-            el.checked = !isActive; // revert on error
+            el.checked = !el.checked; // revert on error
         });
     }
 
-    // Attach event to all switches
     document.querySelectorAll(".form-check-input").forEach(switchEl => {
         switchEl.addEventListener("change", function() {
             toggleVideoStatus(this);
         });
     });
 
-           var selectedVideoId = 0;
+    var selectedVideoId = 0;
 
     function setDeleteId(id) {
         selectedVideoId = id;

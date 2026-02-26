@@ -9,20 +9,22 @@
 <form method="post" asp-action="Edit" asp-controller="AdminUser">
     @Html.AntiForgeryToken()
 
+    <input type="hidden" asp-for="Id" />
+
     <div class="mb-3" style="max-width: 400px;">
         <label>Email/Username</label>
-        <input type="text" name="EmailUsername" class="form-control" required />
+        <input asp-for="EmailUsername" class="form-control" />
     </div>
 
     <div class="mb-3" style="max-width: 400px;">
         <label>Password</label>
-        <input type="text" name="Password" class="form-control" required />
+        <input asp-for="Password" class="form-control" />
     </div>
 
     <div class="mb-3 row" style="max-width: 400px;">
         <div class="col-4">
             <label>Country Code</label>
-            <select name="CountryCode" class="form-control" required>
+            <select asp-for="CountryCode" class="form-control">
                 <option value="+1">+1 (USA)</option>
                 <option value="+91">+91 (India)</option>
                 <option value="+44">+44 (UK)</option>
@@ -30,9 +32,10 @@
                 <option value="+81">+81 (Japan)</option>
             </select>
         </div>
+
         <div class="col-8">
             <label>Mobile</label>
-            <input type="text" name="Mobile" class="form-control" required />
+            <input asp-for="Mobile" class="form-control" />
         </div>
     </div>
 

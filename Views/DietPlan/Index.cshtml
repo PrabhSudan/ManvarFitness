@@ -1,0 +1,139 @@
+﻿@model IEnumerable<ManvarFitness.Entity.DietPlan>
+<style>
+    /* OFF state */
+    .form-check-input {
+        background-color: #ccc; /* gray when OFF */
+        border-radius: 1rem; /* keep default Bootstrap rounded */
+        transition: background-color 0.4s;
+    }
+
+        /* ON state */
+        .form-check-input:checked {
+            background-color: #FF7F11; /* orange when ON */
+        }
+</style>
+@{
+    ViewData["Title"] = "Manage Plans";
+}
+
+<h2 class="fw-semibold mb-3"
+    style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">
+    Manage Plans
+</h2>
+<br />
+<a class="btn btn-primary mb-3" asp-controller="DietPlan" asp-action="Create">Add Plan</a>
+
+@Html.AntiForgeryToken()
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th style="width:70%">Plan</th>
+            <th style="width:10%">View</th>
+            <th style="width:10%">Status</th>
+            <th style="width:10%">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var plan in Model)
+        {
+            <tr id="planRow@plan.Id">
+                <td>@plan.Name</td>
+                <td class="text-center">
+                    <a class="btn btn-sm" asp-action="Details" asp-route-id="@plan.Id">
+                        <i class="bi bi-eye-fill"></i>
+                    </a>
+                </td>
+                <td class="text-center">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input toggle-status"
+                               type="checkbox"
+                               data-planid="@plan.Id"
+                               id="switchPlan@plan.Id"
+                               @(plan.IsActive ? "checked" : "") />
+                        <label class="form-check-label" for="switchPlan@plan.Id"></label>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <button type="button"
+                            class="btn btn-sm text-warning me-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                            data-planid="@plan.Id"
+                            data-planname="@plan.Name">
+                        <i class="bi bi-trash-fill fs-5"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="planNameToDelete"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" asp-controller="DietPlan" asp-action="Delete">
+                    <input type="hidden" id="planIdInput" name="id" value="" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            // --- Delete Modal ---
+            const deleteModal = document.getElementById('deleteModal');
+            deleteModal?.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const planId = button.getAttribute('data-planid');
+                const planName = button.getAttribute('data-planname');
+
+                document.getElementById('planIdInput').value = planId;
+                document.getElementById('planNameToDelete').innerText = planName;
+            });
+
+            // --- Toggle Status ---
+            document.querySelectorAll(".toggle-status").forEach(chk => {
+                chk.addEventListener("change", function() {
+                    const id = parseInt(this.getAttribute("data-planid"));
+                    const current = this;
+
+                    fetch('@Url.Action("Toggle", "DietPlan")', {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "RequestVerificationToken": token
+                        },
+                        body: JSON.stringify({ id: id })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!data.success) {
+                            alert("Failed to update status");
+                            current.checked = !current.checked;
+                        }
+                    })
+                    .catch(err => {
+                        alert("Error updating status");
+                        current.checked = !current.checked;
+                    });
+                });
+            });
+        });
+    </script>
+}

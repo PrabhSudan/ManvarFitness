@@ -1,37 +1,105 @@
-﻿@model dynamic
+﻿@model ManvarFitness.Models.ResultModel
+
 @{
-    ViewData["Title"] = "Add Result";
+    ViewData["Title"] = "Create Result";
 }
 
-<h1>Create User</h1>
-<form method="post" action="/Result/Create">
-    @Html.AntiForgeryToken()
-    <div class="mb-3" style="max-width: 400px;">
-        <label>Name</label>
-        <input type="text" name="name" class="form-control" required />
-    </div>
-    <div class="mb-3" style="max-width: 400px;">
-        <label>Category</label>
-        <select name="category" class="form-select" required>
-            <option value="" selected disabled>Selected Category</option>
-            <option value="category1">Category 1</option>
-            <option value="category2">Category 2</option>
-            <option value="category3">Category 3</option>
-            <option value="category4">Category 4</option>
-            <option value="category5">Category 5</option>
-        </select>
-    </div>
-    <div class="mb-3" style="max-width: 200px;">
-        <label>Date</label>
-        <input type="date" name="Date" class="form-control" required />
-    </div>
-    <div class="mb-3" style="max-width: 400px;">
-        <label> UploadResult</label>
-        <input type="file" name="Result" class="form-control" required />
-    </div>
-    <button type="submit" class="btn btn-success">Save</button>
-    <a class="btn btn-secondary" href="/Result/Index">Cancel</a>
-</form>
+<h1 class="fw-semibold mb-3"
+    style="display:inline-block;color:#333;
+           padding-bottom:4px;
+           border-bottom:3px solid #FF7F11;">
+    Add New Result
+</h1>
+
+<div class="container-fluid px-4">
+
+    <form asp-action="Create"
+          method="post"
+          enctype="multipart/form-data">
+
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+                <label asp-for="UserId" class="form-label fw-semibold"></label>
+                <select asp-for="UserId"
+                        asp-items="ViewBag.Users"
+                        class="form-select">
+                    <option value="">-- Select User --</option>
+                </select>
+                <span asp-validation-for="UserId" class="text-danger"></span>
+            </div>
+            <!-- SUB CONCERN -->
+            <div class="col-md-6 mb-3">
+                <label asp-for="SubConcernId" class="form-label fw-semibold"></label>
+                <select asp-for="SubConcernId"
+                        asp-items="ViewBag.SubConcerns"
+                        class="form-select">
+                    <option value="">-- Select Sub Concern --</option>
+                </select>
+                <span asp-validation-for="SubConcernId"
+                      class="text-danger"></span>
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="col-md-6 mb-3">
+                <label asp-for="Description"
+                       class="form-label fw-semibold"></label>
+                <textarea asp-for="Description"
+                          class="form-control"
+                          rows="3"></textarea>
+                <span asp-validation-for="Description"
+                      class="text-danger"></span>
+            </div>
+
+            <!-- BEFORE IMAGES -->
+            <div class="col-md-6 mb-3">
+                <label asp-for="BeforeImageFile"
+                       class="form-label fw-semibold"></label>
+                <input asp-for="BeforeImageFile"
+                       type="file"
+                       class="form-control"
+                       multiple />
+            </div>
+
+            <!-- AFTER IMAGES -->
+            <div class="col-md-6 mb-3">
+                <label asp-for="AfterImageFile"
+                       class="form-label fw-semibold"></label>
+                <input asp-for="AfterImageFile"
+                       type="file"
+                       class="form-control"
+                       multiple />
+            </div>
+
+            <!-- VIDEOS -->
+            @* <div class="col-md-6 mb-3">
+                <label asp-for="Videos"
+                       class="form-label fw-semibold"></label>
+                <input asp-for="Videos"
+                       type="file"
+                       class="form-control"
+                       multiple />
+            </div> *@
+
+        </div>
+
+        <div class="mt-3">
+            <button type="submit"
+                    class="btn btn-success px-4">
+                Save
+            </button>
+
+            <a asp-action="Index"
+               class="btn btn-secondary px-4">
+                Cancel
+            </a>
+        </div>
+
+    </form>
+</div>
+
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

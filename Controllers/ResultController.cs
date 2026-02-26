@@ -1,145 +1,221 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ManvarFitness.Database;
+using ManvarFitness.Entity;
+using ManvarFitness.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace ManvarFitness.Controllers
 {
     public class ResultController : Controller
     {
-        private static List<dynamic> Results = new()
+        private readonly ApplicationDbContext _context;
+        public ResultController(ApplicationDbContext context)
         {
-            new { Id = 1, Name = "John Doe", Category = "Category1", Date = "2024-01-01", Result="null" },
-            new { Id = 2, Name = "Jane Smith", Category = "Category2", Date = "2024-01-02", Result="null" },
-            new { Id = 3, Name = "Jamie", Category = "Category3", Date = "2024-01-03", Result="null" }
-        };
-
-        // GET: ResultController
-        public ActionResult Index()
-        {
-            return View(Results);
+            _context = context;
         }
-
-        // GET: ResultController/Details/5
-        public ActionResult Details(int id)
+        // GET: ResultController
+        public IActionResult Index()
         {
-            var result = Results.FirstOrDefault(u => u.Id == id);
-            if (result == null)
-            {
-                return NotFound();
-            }
-            return View(result);
+            var results = _context.Results
+                .Include(s => s.User)
+                .Include(s => s.ConcernCategory)
+                .Include(s => s.SubConcern)
+                .ToList();
+            return View(results);
         }
 
         // GET: ResultController/Create
-        public ActionResult Create()
+        public IActionResult Create()
         {
+            ViewBag.SubConcerns = new SelectList(
+                _context.SubConcerns
+                    .Include(s => s.Concern)
+                    .ToList(),
+                "SubConcernId",
+                "Name"
+            );
+            ViewBag.Users = _context.Users.Select(u => new
+            {
+                u.UserId,
+                Display = u.CountryCode + " " + u.Mobile
+            }).ToList();
+
+            ViewBag.Users = new SelectList(ViewBag.Users, "UserId", "Display");
             return View();
         }
 
         // POST: ResultController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(string Name, string Category, string Date, IFormFile? Result)
+        public IActionResult Create(ResultModel model)
         {
-            string?filePath = null;
-            if (Result != null && Result.Length > 0)
-            {
-                // Folder to save files
-                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\results");
-                if (!Directory.Exists(uploads))
-                    Directory.CreateDirectory(uploads);
+            if (!ModelState.IsValid)
+                return View(model);
 
-                // Save file
-                var fileName = Path.GetFileName(Result.FileName);
-                filePath = Path.Combine(uploads, fileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    Result.CopyTo(fileStream);
-                }
-                // Store relative path for use in views
-                filePath = "/results/" + fileName;
+            string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/results");
+
+            if (!Directory.Exists(uploadPath))
+                Directory.CreateDirectory(uploadPath);
+
+            var beforeList = SaveFiles(model.BeforeImageFile, uploadPath);
+            var afterList = SaveFiles(model.AfterImageFile, uploadPath);
+            var videoList = SaveFiles(model.Videos, uploadPath);
+
+            //  Get SubConcern
+            var subConcern = _context.SubConcerns.FirstOrDefault(x => x.SubConcernId == model.SubConcernId);
+            if (subConcern == null)
+                return NotFound();
+
+            // Auto get Concern from SubConcern
+            int concernId = subConcern.ConcernId;
+
+            int? userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+            {
+                TempData["Error"] = "Session expired. Please login again.";
+                return RedirectToAction("Login", "Auth"); 
             }
 
-            // Add new result to the static list
-            int newId = Results.Max(u => u.Id) + 1;
-            Results.Add(new { Id = newId, Name = Name, Category = Category, Date = Date, Result = filePath });
+            var entity = new ResultEntity
+            {
+                UserId = model.UserId,
+                ConcernCategoryId = concernId,
+                SubConcernId = model.SubConcernId,
+                Description = model.Description,
+                IsActive = true,
+                BeforeImage = JsonSerializer.Serialize(beforeList),
+                AfterImage = JsonSerializer.Serialize(afterList),
+                Video = JsonSerializer.Serialize(videoList)
+            };
 
+            _context.Results.Add(entity);
+            _context.SaveChanges();
             return RedirectToAction("Index");
         }
 
         // GET: ResultController/Edit/5
-        public ActionResult Edit(int id)
+        public IActionResult Edit(int id)
         {
-            var result = Results.FirstOrDefault(u => u.Id == id);
+            var result = _context.Results
+                   .Include(r => r.User)
+                   .Include(r => r.SubConcern)
+                   .Include(r => r.ConcernCategory)
+                   .FirstOrDefault(r => r.ResultId == id);
+
+            if (result == null) return NotFound();
+
+            return View(result);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, ResultModel model)
+        {
+            var result = _context.Results.Find(id);
+            if (result == null)
+                return NotFound();
+
+            string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/results");
+
+            if (!Directory.Exists(uploadPath))
+                Directory.CreateDirectory(uploadPath);
+
+            // BEFORE IMAGES
+            var existingBefore = string.IsNullOrEmpty(result.BeforeImage) ? new List<string>()
+                : System.Text.Json.JsonSerializer.Deserialize<List<string>>(result.BeforeImage);
+            if (model.BeforeImageFile != null && model.BeforeImageFile.Count > 0)
+            {
+                var newbefore = SaveFiles(model.BeforeImageFile, uploadPath);
+                foreach (var img in newbefore)
+                {
+                    if (!existingBefore.Contains(img))
+                        existingBefore.Add(img);
+                }
+                result.BeforeImage = System.Text.Json.JsonSerializer.Serialize(existingBefore);
+            }
+
+            // AFTER IMAGES
+            var existingAfter = string.IsNullOrEmpty(result.AfterImage) ? new List<string>()
+               : System.Text.Json.JsonSerializer.Deserialize<List<string>>(result.AfterImage);
+            if (model.AfterImageFile != null && model.AfterImageFile.Count > 0)
+            {
+                var newAfter = SaveFiles(model.AfterImageFile, uploadPath);
+                foreach (var img in newAfter)
+                {
+                    if (!existingAfter.Contains(img))
+                        existingAfter.Add(img);
+                }
+                result.BeforeImage = System.Text.Json.JsonSerializer.Serialize(existingAfter);
+            }
+
+            _context.SaveChanges();
+
+            TempData["Success"] = "Files updated successfully!";
+            return RedirectToAction("Index");
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Toggle(int id)
+        {
+            var result = _context.Results.Find(id);
             if (result == null)
             {
                 return NotFound();
             }
-            return View(result);
+
+            result.IsActive = !result.IsActive;
+            _context.SaveChanges();
+
+            TempData["Success"] =
+                $"Result {(result.IsActive ? "activated" : "deactivated")} successfully!";
+
+            return RedirectToAction("Index");
         }
 
-        // POST: ResultController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, string Date, IFormFile? Result)
+        public IActionResult SoftDelete(int id)
         {
-            // Find the specific result entry by Id
-            var existing = Results.Find(u => u.Id == id);
-            if (existing == null)
-                return NotFound();
-
-            string? filePath = existing.Result; // Keep old file if no new upload
-
-            // If a new file is uploaded, save it
-            if (Result != null && Result.Length > 0)
+            var role = _context.Roles.Find(id);
+            if (role == null)
             {
-                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot\\results");
-                if (!Directory.Exists(uploads))
-                    Directory.CreateDirectory(uploads);
+                return Json(new { success = false });
+            }
+            role.IsDeleted = true;
 
-                var fileName = Path.GetFileName(Result.FileName);
-                filePath = Path.Combine(uploads, fileName);
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
+
+        // Save File Method
+        private List<string> SaveFiles(List<IFormFile>? files, string uploadPath)
+        {
+            var savedFiles = new List<string>();
+
+            if (files == null || files.Count == 0)
+                return savedFiles;
+
+            foreach (var file in files)
+            {
+                var fileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+                var filePath = Path.Combine(uploadPath, fileName);
 
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
-                    Result.CopyTo(fileStream);
+                    file.CopyTo(fileStream);
                 }
 
-                // Store relative path for views
-                filePath = "/results/" + fileName;
+                savedFiles.Add("/uploads/results/" + fileName);
             }
 
-            // Remove old entry and add updated one 
-            Results.Remove(existing);
-            Results.Add(new
-            {
-                Id = existing.Id,
-                Name = existing.Name,           
-                Category = existing.Category,   
-                Date = Date,                    
-                Result = filePath               
-            });
-
-            return RedirectToAction("Index");
-        }
-
-
-        // GET: ResultController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            var user = Results.FirstOrDefault(u => u.Id == id);
-            if (user == null) return NotFound();
-            return View(user);
-        }
-
-        // POST: ResultController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            var user = Results.FirstOrDefault(u => u.Id == id);
-            if (user != null) Results.Remove(user);
-            return RedirectToAction("Index");
+            return savedFiles;
         }
     }
 }

@@ -1,37 +1,215 @@
-﻿@model dynamic
-@{
-    ViewData["Title"] = "Edit Result";
-}
+﻿@model ManvarFitness.Entity.ResultEntity
+@using System.Text.Json
 
-<h1>Edit User</h1>
-<form method="post" action="/Result/Edit">
-    @Html.AntiForgeryToken()
-    <div class="mb-3" style="max-width: 400px;">
-        <label>Name</label>
-        <input type="text" name="name" class="form-control" required />
-    </div>
-    <div class="mb-3" style="max-width: 400px;">
-        <label>Category</label>
-        <select name="category" class="form-select" required>
-            <option value="" selected disabled>Selected Category</option>
-            <option value="category1">Category 1</option>
-            <option value="category2">Category 2</option>
-            <option value="category3">Category 3</option>
-            <option value="category4">Category 4</option>
-            <option value="category5">Category 5</option>
-        </select>
-    </div>
-    <div class="mb-3" style="max-width: 400px;">
-        <label>Date</label>
-        <input type="date" name="Date" class="form-control" required />
-    </div>
-    <div class="mb-3" style="max-width: 400px;">
-        <label> UploadResult</label>
-        <input type="file" name="Result" class="form-control" required />
-    </div>
-    <button type="submit" class="btn btn-success">Save</button>
-    <a class="btn btn-secondary" href="/Result/Index">Cancel</a>
-</form>
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+<h1 class="fw-semibold mb-4"
+    style="border-bottom: 3px solid #FF7F11; display:inline-block;">
+    Edit Result
+</h1>
+
+<div class="container-fluid px-4">
+
+    <form asp-action="Edit"
+          asp-route-id="@Model.ResultId"
+          method="post"
+          enctype="multipart/form-data">
+
+        @Html.AntiForgeryToken()
+
+        <!-- USER -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">User:</label>
+            <input type="text"
+                   class="form-control"
+                   value="@(Model.User?.Name ?? "Not Assigned")"
+                   readonly />
+        </div>
+
+        <!-- CONCERN -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Concern:</label>
+            <input type="text"
+                   class="form-control"
+                   value="@($"{Model.SubConcern?.Name} ({Model.ConcernCategory?.Name})")"
+                   disabled />
+        </div>
+
+        <!-- BEFORE IMAGES -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Before Images</label>
+
+            <!-- Existing -->
+            <div class="mb-2 d-flex flex-wrap">
+                @{
+                    var beforeImages = string.IsNullOrEmpty(Model.BeforeImage)
+                    ? new List<string>()
+                    : JsonSerializer.Deserialize<List<string>>(Model.BeforeImage);
+                }
+
+                @foreach (var img in beforeImages)
+                {
+                    <img src="@img"
+                         style="width:120px;height:80px;object-fit:cover;
+                            margin:4px;border-radius:4px;" />
+                }
+            </div>
+
+            <!-- Upload container -->
+            <div id="beforeContainer">
+                <input type="file"
+                       name="BeforeImageFile"
+                       multiple
+                       class="form-control mb-2"
+                       onchange="previewImages(this,'beforePreview')" />
+            </div>
+
+            <button type="button"
+                    class="btn btn-success btn-sm"
+                    id="addBeforeBtn">
+                +
+            </button>
+
+            <div id="beforePreview"
+                 class="d-flex flex-wrap mt-2"></div>
+        </div>
+
+        <!-- AFTER IMAGES -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">After Images</label>
+
+            <!-- Existing -->
+            <div class="mb-2 d-flex flex-wrap">
+                @{
+                    var afterImages = string.IsNullOrEmpty(Model.AfterImage)
+                    ? new List<string>()
+                    : JsonSerializer.Deserialize<List<string>>(Model.AfterImage);
+                }
+
+                @foreach (var img in afterImages)
+                {
+                    <img src="@img"
+                         style="width:120px;height:80px;object-fit:cover;
+                            margin:4px;border-radius:4px;" />
+                }
+            </div>
+
+            <!-- Upload container -->
+            <div id="afterContainer">
+                <input type="file"
+                       name="AfterImageFile"
+                       multiple
+                       class="form-control mb-2"
+                       onchange="previewImages(this,'afterPreview')" />
+            </div>
+
+            <button type="button"
+                    class="btn btn-success btn-sm"
+                    id="addAfterBtn">
+                +
+            </button>
+
+            <div id="afterPreview"
+                 class="d-flex flex-wrap mt-2"></div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold">Description</label>
+            <textarea class="form-control"
+                      name="Description"
+                      rows="3">@Model.Description</textarea>
+        </div>
+
+        <button type="submit"
+                class="btn btn-success px-4 py-2">
+            Save Changes
+        </button>
+
+        <a asp-action="Index"
+           class="btn btn-secondary px-4 py-2 ms-2">
+            Cancel
+        </a>
+
+    </form>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // Add BEFORE input
+        document.getElementById("addBeforeBtn")
+            .addEventListener("click", function () {
+                addFileInput("beforeContainer", "BeforeImageFile", "beforePreview");
+            });
+
+        // Add AFTER input
+        document.getElementById("addAfterBtn")
+            .addEventListener("click", function () {
+                addFileInput("afterContainer", "AfterImageFile", "afterPreview");
+            });
+    });
+
+    function addFileInput(containerId, inputName, previewId) {
+
+        const container = document.getElementById(containerId);
+
+        // Wrapper div
+        const wrapper = document.createElement("div");
+        wrapper.className = "d-flex align-items-center mb-2";
+
+        // File input
+        const input = document.createElement("input");
+        input.type = "file";
+        input.name = inputName;
+        input.multiple = true;
+        input.className = "form-control me-2";
+        input.onchange = function () {
+            previewImages(this, previewId);
+        };
+
+        // Remove button
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "btn btn-danger btn-sm";
+        removeBtn.innerText = "-";
+
+        removeBtn.addEventListener("click", function () {
+            wrapper.remove();
+        });
+
+        wrapper.appendChild(input);
+        wrapper.appendChild(removeBtn);
+        container.appendChild(wrapper);
+    }
+
+    // Preview Function
+    function previewImages(input, previewId) {
+
+        const previewContainer =
+            document.getElementById(previewId);
+
+        if (!previewContainer) return;
+
+        if (input.files) {
+            Array.from(input.files).forEach(file => {
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+
+                    const img = document.createElement("img");
+
+                    img.src = e.target.result;
+                    img.style.width = "120px";
+                    img.style.height = "80px";
+                    img.style.objectFit = "cover";
+                    img.style.margin = "4px";
+                    img.style.borderRadius = "6px";
+                    img.style.border = "1px solid #ddd";
+
+                    previewContainer.appendChild(img);
+                }
+
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+</script>

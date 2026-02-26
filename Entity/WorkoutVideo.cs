@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ManvarFitness.Enum;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ManvarFitness.Entity
 {
-    [Table("Workout")]
+
     public class WorkoutVideo : BaseEntity
     {
         [Key]
@@ -30,6 +31,6 @@ namespace ManvarFitness.Entity
         [NotMapped]
         public string Status => IsActive ? "Active" : "Inactive";
 
-
+        public WorkoutCategory Category { get; set; }
     }
 }

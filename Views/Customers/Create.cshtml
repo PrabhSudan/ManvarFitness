@@ -1,0 +1,26 @@
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<h1>Create User</h1>
+<form method="post" action="/User/Create">
+    @Html.AntiForgeryToken()
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Name</label>
+        <input type="text" name="name" class="form-control" required />
+    </div>
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Email</label>
+        <input type="email" name="email" class="form-control" required />
+    </div>
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Phone</label>
+        <input type="text" name="phone" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+    <a class="btn btn-secondary" href="/User/Index">Cancel</a>
+</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

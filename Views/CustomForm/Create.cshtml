@@ -1,0 +1,138 @@
+﻿@model ManvarFitness.Models.CustomFormModel
+
+<h2>Create Custom Form</h2>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <!-- Main Concern -->
+    <div class="form-group mb-3">
+        <label asp-for="ConcernId" class="form-label">Select Main Concern</label>
+        <select asp-for="ConcernId" class="form-select" id="ConcernDropdown" asp-items="ViewBag.ConcernsList">
+            <option value="">-- Select Concern --</option>
+        </select>
+        <span asp-validation-for="ConcernId" class="text-danger"></span>
+    </div>
+
+    <!-- Sub Concern -->
+    <div class="form-group mb-3">
+        <label asp-for="SubConcernId" class="form-label">Select Sub Concern</label>
+        <select asp-for="SubConcernId" class="form-select" id="SubConcernDropdown" asp-items="ViewBag.SubConcernsList">
+            <option value="">-- Select Sub Concern --</option>
+        </select>
+        <span asp-validation-for="SubConcernId" class="text-danger"></span>
+    </div>
+
+    <!-- Dynamic Fields -->
+    <h5>Fields</h5>
+    <div id="fields-container">
+        <div class="field-item mb-2 d-flex align-items-center gap-2">
+            <input name="Fields[0].Label" class="form-control me-2" placeholder="Field Name" required />
+
+            <select name="Fields[0].FieldType" class="form-select field-type me-2">
+                <option value="">Select FieldType</option>
+                <option value="Text">Text</option>
+                <option value="Number">Number</option>
+                <option value="Select">Select</option>
+                <option value="Radio">Radio</option>
+                <option value="Checkbox">Checkbox</option>
+                <option value="Date">Date</option>
+                <option value="File">File</option>
+            </select>
+
+            <!-- Number Range -->
+            <div class="number-range d-none d-flex gap-2">
+                <input name="Fields[0].MinValue" class="form-control" placeholder="Min" />
+                <input name="Fields[0].MaxValue" class="form-control" placeholder="Max" />
+            </div>
+
+            <button type="button" class="btn btn-success btn-sm add-field">+</button>
+        </div>
+    </div>
+
+    <button type="submit" id="saveform" class="btn btn-primary mt-3">Save</button>
+</form>
+
+@section Scripts {
+    <script>
+        let fieldIndex = 1;
+
+        // Load SubConcerns dynamically
+        document.getElementById("ConcernDropdown").addEventListener("change", function () {
+            const concernId = this.value;
+            fetch(`/CustomForm/GetSubConcerns?concernId=${concernId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const subDropdown = document.getElementById("SubConcernDropdown");
+                    subDropdown.innerHTML = '<option value="">-- Select Sub Concern --</option>';
+                    data.forEach(item => {
+                        subDropdown.innerHTML += `<option value="${item.subConcernId}">${item.name}</option>`;
+                    });
+                });
+        });
+
+        // Add / Remove Fields dynamically
+        document.getElementById("fields-container").addEventListener("click", function(e) {
+            if (e.target.classList.contains("add-field")) {
+                const container = document.getElementById("fields-container");
+                const div = document.createElement("div");
+                div.classList.add("field-item", "mb-2", "d-flex", "align-items-center", "gap-2");
+
+                div.innerHTML = `
+                    <input name="Fields[${fieldIndex}].Label" class="form-control me-2" placeholder="Field Name" required/>
+                    <select name="Fields[${fieldIndex}].FieldType" class="form-select field-type me-2">
+                        <option value="">Select FieldType</option>
+                        <option value="Text">Text</option>
+                        <option value="Number">Number</option>
+                        <option value="Select">Select</option>
+                        <option value="Radio">Radio</option>
+                        <option value="Checkbox">Checkbox</option>
+                        <option value="Date">Date</option>
+                        <option value="File">File</option>
+                    </select>
+                    <div class="number-range d-none d-flex gap-2">
+                        <input name="Fields[${fieldIndex}].MinValue" class="form-control" placeholder="Min"/>
+                        <input name="Fields[${fieldIndex}].MaxValue" class="form-control" placeholder="Max"/>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-sm remove-field">-</button>
+                `;
+                container.appendChild(div);
+                fieldIndex++;
+            }
+
+            if (e.target.classList.contains("remove-field")) {
+                e.target.closest(".field-item").remove();
+            }
+        });
+
+        // Show / Hide Number Range dynamically
+        document.getElementById("fields-container").addEventListener("change", function(e) {
+            if (!e.target.classList.contains("field-type")) return;
+
+            const parent = e.target.closest(".field-item");
+            const numberRange = parent.querySelector(".number-range");
+
+            if (numberRange) {
+                numberRange.classList.add("d-none"); // hide by default
+                if (e.target.value === "Number") numberRange.classList.remove("d-none");
+            }
+        });
+
+        // Re-index fields before submit
+        function reIndexFields() {
+            const items = document.querySelectorAll("#fields-container .field-item");
+            items.forEach((item, index) => {
+                item.querySelectorAll("input, select").forEach(input => {
+                    if (input.name) {
+                        input.name = input.name.replace(/Fields\[\d+\]/, `Fields[${index}]`);
+                    }
+                });
+            });
+        }
+
+        document.querySelector("form").addEventListener("submit", function () {
+            reIndexFields();
+        });
+
+    </script>
+}

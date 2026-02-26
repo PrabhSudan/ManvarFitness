@@ -3,16 +3,35 @@ using ManvarFitness.Entity;
 using ManvarFitness.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace ManvarFitness.Controllers
 {
-    public class AdminUserController : Controller
+    public class AdminUserController : BaseController
     {
         private readonly ApplicationDbContext _context;
         public AdminUserController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        //  Automatically secure all actions
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            var loginCheck = RequireLogin();
+            if (loginCheck != null)
+            {
+                context.Result = loginCheck;
+                return;
+            }
+            var roleCheck = AuthorizeRole("Admin");
+            if (roleCheck != null)
+            {
+                context.Result = roleCheck;
+                return;
+            }
+            base.OnActionExecuting(context);
         }
         // GET: AdminUserController
         public async Task<IActionResult> Index()
@@ -57,7 +76,7 @@ namespace ManvarFitness.Controllers
             }
             // On create
             model.CreatedOn = DateTime.UtcNow;
-            model.CreatedBy = 1;
+            model.CreatedBy = CurrentUserId;
             model.IsDeleted = false;
             _context.AdminUsers.Add(model);
             await _context.SaveChangesAsync();
@@ -99,7 +118,7 @@ namespace ManvarFitness.Controllers
             user.Mobile = model.Mobile;
             // On edit 
             user.UpdatedOn = DateTime.UtcNow;
-            user.UpdatedBy = 1;
+            user.UpdatedBy = CurrentUserId;
 
             _context.AdminUsers.Update(user);
             await _context.SaveChangesAsync();
@@ -145,6 +164,20 @@ namespace ManvarFitness.Controllers
             await _context.SaveChangesAsync();
 
             return Json(new { success = true, isActive = user.IsActive });
+        }
+
+        [HttpPost]
+        public IActionResult UpdateRole(int id, [FromBody] RoleUpdateModel model)
+        {
+            var user = _context.AdminUsers.Find(id);
+
+            if (user == null)
+                return Json(new { success = false });
+
+            user.Role = model.Role;
+            _context.SaveChanges();
+
+            return Json(new { success = true });
         }
     }
 }

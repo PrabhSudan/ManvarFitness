@@ -1,0 +1,173 @@
+﻿@model IEnumerable<ManvarFitness.Entity.CustomField>
+<style>
+    /* OFF state */
+    .form-check-input {
+        background-color: #ccc; /* gray when OFF */
+        border-radius: 1rem; /* keep default Bootstrap rounded */
+        transition: background-color 0.4s;
+    }
+
+        /* ON state */
+        .form-check-input:checked {
+            background-color: #FF7F11; /* orange when ON */
+        }
+</style>
+@{
+    ViewData["Title"] = "Manage Fields";
+}
+@Html.AntiForgeryToken()
+<h2 class="fw-semibold mb-3" style="display:inline-block; border-bottom:3px solid #FF7F11;">
+    Manage Fields
+</h2>
+
+
+<!-- Concern Dropdown -->
+<form method="get" class="mb-3">
+    <div class="input-group" style="max-width: 300px;">
+        <select name="concernId" class="form-select" onchange="this.form.submit()">
+            <option value="">-- Select Concern --</option>
+
+            @foreach (var concern in ViewBag.Concerns)
+            {
+                <option value="@concern.ConcernId" selected="@(ViewBag.SelectedConcern == concern.ConcernId)">
+                    @concern.Name
+                </option>
+            }
+        </select>
+    </div>
+</form>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>Field</th>
+            <th>Field Type</th>
+            <th>Limit</th>
+            <th>IsActive</th>
+            <th>IsRequired</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var field in Model)
+        {
+            <tr>
+                <td>@field.Label</td>
+                <td>@field.FieldType</td>
+                <td>
+                    @if (field.MinValue != null || field.MaxValue != null)
+                    {
+                        @($"{field.MinValue ?? 0} - {field.MaxValue ?? 0}")
+                    }
+                    else if (field.MaxLength != null)
+                    {
+                        @($"Max {field.MaxLength}")
+                    }
+                </td>
+                <!-- Active Toggle -->
+                <td class="text-center">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input toggle-active" type="checkbox"
+                               data-id="@field.CustomFieldId"
+                               @(field.IsActive ? "checked" : "")>
+                    </div>
+                </td>
+
+                <!-- Required Toggle -->
+                <td class="text-center">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input toggle-required" type="checkbox"
+                               data-id="@field.CustomFieldId"
+                               @(field.IsRequired ? "checked" : "")>
+                    </div>
+                </td>
+
+                <td>
+                    
+                    <button type="button"
+                            class="btn btn-sm text-warning me-1"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                            data-planid="@field.CustomFieldId"
+                            data-planname="@field.Label">
+                        <i class="bi bi-trash-fill fs-5"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-sm">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="planNameToDelete"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" asp-controller="DietPlan" asp-action="Delete">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="planIdInput" name="id" value="" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a asp-action="Create"
+   class="btn btn-success px-4 py-2 fw-semibold">
+    Add New Field
+</a>
+@section Scripts {
+    <script>
+        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+
+        function toggleField(url, checkbox, id) {
+            const formData = new URLSearchParams();
+            formData.append("__RequestVerificationToken", tokenInput.value);
+            formData.append("id", id);
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: formData.toString()
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    checkbox.checked = !checkbox.checked;
+                    alert("Toggle failed");
+                }
+            })
+            .catch(() => {
+                checkbox.checked = !checkbox.checked;
+                alert("Error occurred");
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            document.querySelectorAll(".toggle-active").forEach(cb => {
+                cb.addEventListener("change", function () {
+                    toggleField("/CustomForm/ToggleActive", this, this.dataset.id);
+                });
+            });
+
+            document.querySelectorAll(".toggle-required").forEach(cb => {
+                cb.addEventListener("change", function () {
+                    toggleField("/CustomForm/ToggleRequired", this, this.dataset.id);
+                });
+            });
+
+        });
+    </script>
+}

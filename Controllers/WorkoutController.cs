@@ -68,6 +68,7 @@ namespace ManvarFitness.Controllers
                 Difficulty = model.Difficulty,
                 IsActive = model.IsActive,
                 VideoUrl = model.VideoUrl,
+                Category = model.Category,
                 CreatedOn = DateTime.UtcNow
             };
             _context.WorkoutVideos.Add(entity);
@@ -76,17 +77,62 @@ namespace ManvarFitness.Controllers
             return RedirectToAction("Videos", "Workout");
         }
 
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var video = _context.WorkoutVideos.Find(id);
+            if(video == null)
+            {
+                return NotFound();
+            }
+            return View(video);
+        }
+
         [HttpPost]
-        public IActionResult ToggleStatus(int id, [FromBody] WorkoutVideoModel model)
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(WorkoutVideoModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var video = _context.WorkoutVideos.Find(model.Id);
+            if (video == null)
+                return NotFound();
+            
+
+            video.Title = model.Title;
+            video.Description = model.Description;
+            video.Difficulty = model.Difficulty;
+            video.IsActive = model.IsActive;
+            video.Category = model.Category;
+
+            if (model.VideoFile != null)
+            {
+                var fileName = Guid.NewGuid() + Path.GetExtension(model.VideoFile.FileName);
+                var filePath = Path.Combine(uploadfolder, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                model.VideoFile.CopyTo(stream);
+
+                video.VideoUrl = "/uploads/" + fileName;
+            }
+            _context.SaveChanges();
+            TempData["Success"] = "Video updated successfully";
+
+            return RedirectToAction("Videos");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleStatus(int id)
         {
             var video = _context.WorkoutVideos.Find(id);
             if (video == null)
                 return Json(new { success = false });
 
-            video.IsActive = model.IsActive;
+            video.IsActive = !video.IsActive; 
             _context.SaveChanges();
 
-            return Json(new { success = true });
+            return Json(new { success = true, status = video.IsActive ? "Active" : "Inactive" });
         }
 
         [HttpPost]

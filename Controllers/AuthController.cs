@@ -1,4 +1,4 @@
-using ManvarFitness.Entity;
+using ManvarFitness.Interface;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ManvarFitness.Controllers;
@@ -27,19 +27,23 @@ public class AuthController : Controller
             return View();
         }
 
-        if (password != confirmPassword)
+        else if (password != confirmPassword)
         {
             ViewBag.Error = "Passwords do not match";
             return View();
         }
         var user = await _userRepository.GetUserByEmailOrUsernameAsync(emailUsername);
-        if (user == null)
+        if  (user == null)
         {
             ViewBag.Error = "User not found";
             return View();
         }
-        user.Password = password;
-        await _userRepository.UpdatePasswordAsync(user);
+        else
+        {
+            user.Password = password;
+            await _userRepository.UpdatePasswordAsync(user);
+        }
+            
         return RedirectToAction("Login", "Auth");
     }
 
@@ -52,29 +56,46 @@ public class AuthController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(string emailUsername, string password)
     {
+        var user = await _userRepository.GetUserByEmailOrUsernameAsync(emailUsername);
         if (string.IsNullOrWhiteSpace(emailUsername) ||
             string.IsNullOrWhiteSpace(password))
         {
             ViewBag.Error = "All fields are required";
             return View();
         }
-        var user = await _userRepository.GetUserByEmailOrUsernameAsync(emailUsername);
-        if (user == null)
+        
+        else if (user == null)
         {
             ViewBag.Error = "Invalid email/username";
             return View();
         }
-        if (user == null || !user.IsActive)
+        else if (string.IsNullOrEmpty(password))
+        {
+            ViewBag.Error = "Password is required";
+            return View();
+        }
+        else if (user.Password != password)
+        {
+            ViewBag.Error = "Invalid Password";
+            return View();
+        }
+        else if (user == null || !user.IsActive)
         {
             ViewBag.Error = "User not found or account is disabled";
             return View();
         }
-
+        else
+        {
+            HttpContext.Session.SetString("UserName", user.EmailUsername);
+            HttpContext.Session.SetString("UserRole", user.Role);
+            HttpContext.Session.SetInt32("UserId", user.Id);
+        }
         return RedirectToAction("Index", "Dashboard");
     }
 
     public IActionResult Logout()
     {
+        HttpContext.Session.Clear();
         return RedirectToAction("Login", "Auth");
     }
 }

@@ -190,54 +190,67 @@ body {
 .dashboard{
     display:flex;
 }
-
 /*--Sidebar--*/
-.sidebar{
-    width:220px;
-    background:#fff;
-    border-right:1px solid #ddd;
-    min-height:calc(100vh-60px);
-    transition:transform 0.3s ease;
+.sidebar {
+    width: 220px;
+    background: #fff;
+    border-right: 1px solid #ddd;
+    transition: transform 0.3s ease;
 }
 
 /*--Content--*/
-.content{
-    flex:1;
-    padding:16px;
+.content {
+    flex: 1;
+    padding: 16px;
+    /* push content away from sidebar on desktop */
+    margin-left: 2px;
 }
 
-/*--Large screens--*/
-@media (min-width:900px){
-    .sidebar{
-        position:relative;
-        transform:translateX(0);
+/*--Large screens (Desktop Sticky Sidebar)--*/
+@media (min-width: 900px) {
+    .sidebar {
+        position: sticky; /* sticky instead of relative */
+        top: 60px; /* below topbar */
+        height: calc(100vh - 60px); /* fill viewport height minus topbar */
+        overflow-y: auto; /* scroll inside if content is long */
+        transform: translateX(0);
     }
-    .menu_btn{
-        display:none;
-    }
-}
 
-/*--Tablet & Mobile--*/
-@media(max-width:890px) {
-    .menu-btn{
-        display:block;
-        font-size:24px;
-        background:none;
-        border:none;
-    }
-    .sidebar{
-        position:fixed;
-        top:60px;
-        left:0;
-        height:calc(100vh-60px);
-        transform:translateX(-100%);
-        z-index:1000;
-    }
-    .sidebar.active{
-        transform:translateX(0);
+    .menu-btn {
+        display: none;
     }
 }
 
+/*--Sidebar Mobile Slide--*/
+@media (max-width: 890px) {
+    .sidebar {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 220px;
+        height: calc(100vh - 60px);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+    .menu-btn {
+        display: block;
+        font-size: 24px;
+        cursor: pointer;
+        background: none;
+        border: none;
+    }
+
+    .content {
+        margin-left: 0; /* content fills screen on mobile */
+    }
+}
 /* Mobile-first action buttons */
 .action-buttons {
     display: flex;
@@ -430,3 +443,24 @@ table {
     box-shadow: none !important;
     outline: none !important;
 }
+/* ======================= MOBILE ADJUSTMENTS ======================= */
+@media (max-width: 576px) {
+    .login-card {
+        padding: 24px;
+    }
+
+    .brand {
+        font-size: 20px;
+        flex-direction: column;
+    }
+
+        .brand img {
+            height: 60px;
+        }
+
+    .btn-login {
+        padding: 10px;
+        font-size: 1rem;
+    }
+}
+
