@@ -16,9 +16,16 @@
               (rp, p) => p.Url)
         .ToList();
 
-    bool HasAccess(string controller, string action = "Index")
+    bool HasAccess(string controller, string action = null)
     {
-        return allowedPageUrls.Contains($"/{controller}/{action}");
+        if(action != null)
+        {
+            return allowedPageUrls.Contains($"/{controller}/{action}");
+        }
+        else
+        {
+            return allowedPageUrls.Any(Url => Url.StartsWith($"/{controller}")|| Url == $"/{controller}");
+        }
     }
 }
 <!DOCTYPE html>

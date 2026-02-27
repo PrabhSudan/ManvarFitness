@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualBasic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ManvarFitness.Entity
 {
@@ -19,6 +20,10 @@ namespace ManvarFitness.Entity
         public int? DurantionInMinutes { get; set; }
         public string? Description { get; set; }
         public string? Bedtime { get; set; }
-        public bool IsActive { get; set; } 
+        public bool IsActive { get; set; }
+        [ForeignKey("Concern")]
+        public int ConcernId { get; set; }
+
+        public Concerns? Concern { get; set; }
     }
 }

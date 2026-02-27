@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ManvarFitness.Entity;
+using System.ComponentModel.DataAnnotations;
 
 namespace ManvarFitness.Models
 {
@@ -18,5 +19,7 @@ namespace ManvarFitness.Models
         public List<string> Bedtime { get; set; } = new();
         public string? Description { get; set; } = null;
         public bool IsActive { get; set; } = true;
+        public int ConcernId { get; set; }
+        public Concerns? Concern { get; set; }
     }
 }

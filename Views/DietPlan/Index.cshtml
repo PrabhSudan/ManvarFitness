@@ -1,139 +1,267 @@
-﻿@model IEnumerable<ManvarFitness.Entity.DietPlan>
+﻿@using Microsoft.AspNetCore.Html
+@model ManvarFitness.Models.DietPlanModel
+
+@{
+    ViewData["Title"] = Model.Concern == null
+        ? "Diet Plan"
+        : "Diet Plan Details - " + Model.Concern.Name;
+
+    var alldays = new List<string> { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+    // Helper function to render lists
+    Func<List<string>, IHtmlContent> RenderList = items =>
+    {
+        var ul = "<ol>";
+        if (items != null || items.Any())
+        {
+            foreach (var item in items)
+                ul += $"<li>{item}</li>";
+        }
+        else
+        {
+            ul += "<li></li>";
+        }
+        ul += "</ol>";
+        return Html.Raw(ul);
+    };
+
+}
 <style>
-    /* OFF state */
-    .form-check-input {
-        background-color: #ccc; /* gray when OFF */
-        border-radius: 1rem; /* keep default Bootstrap rounded */
-        transition: background-color 0.4s;
+    .table th {
+        vertical-align: text-top;
+        padding: 18px;
+        text-align: center;
     }
 
-        /* ON state */
-        .form-check-input:checked {
-            background-color: #FF7F11; /* orange when ON */
+    .table td {
+        vertical-align: top;
+        text-align: left;
+        line-padding: 1px;
+    }
+
+    .diet-table {
+        min-width: 350px; /* force horizontal scroll */
+    }
+
+        .diet-table th,
+        .diet-table td {
+            min-width: 200px; /* increase column width */
         }
 </style>
-@{
-    ViewData["Title"] = "Manage Plans";
-}
-
-<h2 class="fw-semibold mb-3"
-    style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">
-    Manage Plans
-</h2>
-<br />
-<a class="btn btn-primary mb-3" asp-controller="DietPlan" asp-action="Create">Add Plan</a>
-
 @Html.AntiForgeryToken()
 
-<table class="table table-bordered table-hover align-middle">
-    <thead class="table-light">
-        <tr>
-            <th style="width:70%">Plan</th>
-            <th style="width:10%">View</th>
-            <th style="width:10%">Status</th>
-            <th style="width:10%">Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var plan in Model)
+<form method="get" asp-action="Index" class="mb-3">
+    <label for="form-label bold-sm">Select Concern:</label>
+    <select id="concernSelect" name="concernId" class="form-select w-50" onchange="this.form.submit()">
+        <option value="">-- Select Concern --</option>
+        @foreach(var c in ViewBag.ConcernsList)
         {
-            <tr id="planRow@plan.Id">
-                <td>@plan.Name</td>
-                <td class="text-center">
-                    <a class="btn btn-sm" asp-action="Details" asp-route-id="@plan.Id">
-                        <i class="bi bi-eye-fill"></i>
-                    </a>
-                </td>
-                <td class="text-center">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input toggle-status"
-                               type="checkbox"
-                               data-planid="@plan.Id"
-                               id="switchPlan@plan.Id"
-                               @(plan.IsActive ? "checked" : "") />
-                        <label class="form-check-label" for="switchPlan@plan.Id"></label>
-                    </div>
-                </td>
-                <td class="text-center">
-                    <button type="button"
-                            class="btn btn-sm text-warning me-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteModal"
-                            data-planid="@plan.Id"
-                            data-planname="@plan.Name">
-                        <i class="bi bi-trash-fill fs-5"></i>
-                    </button>
-                </td>
-            </tr>
+            if(Model.ConcernId == c.ConcernId)
+            {
+                <option value="@c.ConcernId" selected>@c.Name</option>
+            }
+            else
+            {
+                <option value="@c.ConcernId">@c.Name</option>
+            }
         }
-    </tbody>
-</table>
+    </select>
+</form>
+<h2> @ViewData["Title"]</h2>
 
-<!-- Delete Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-sm">
-            <div class="modal-header bg-light">
-                <h5 class="modal-title">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete <strong id="planNameToDelete"></strong>?</p>
-            </div>
-            <div class="modal-footer">
-                <form id="deleteForm" method="post" asp-controller="DietPlan" asp-action="Delete">
-                    <input type="hidden" id="planIdInput" name="id" value="" />
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </div>
-        </div>
-    </div>
+<div style="overflow-x: auto;">
+    <table class="table table-bordered diet-table">
+        <thead class="table-light">
+            <tr>
+                <th>Day</th>
+                <th>Empty Stomach</th>
+                <th>Early Morning Snack</th>
+                <th>Exercise</th>
+                <th>Breakfast</th>
+                <th>Mid Morning Snack</th>
+                <th>Lunch</th>
+                <th>Evening Snack</th>
+                <th>Dinner</th>
+                <th>Bedtime</th>
+            </tr>
+        </thead>
+        <tbody class="top-0" id="diet-body">
+            @for (int i = 0; i < Model.DayName.Count; i++)
+            {
+                var currentDay = Model.DayName[i];
+                <tr>
+
+                    <td>
+                        <select class="day-dropdown">
+                            <option value="">Select Day</option>
+                            @foreach (var day in alldays)
+                            {
+                                var selected = day == currentDay ? "selected" : null;
+                                <option value="@day" selected="@(day! == currentDay ? "selected" : null)">@day</option>
+                            }
+                        </select>
+                    </td>
+                    <td contenteditable="true">@RenderList(Model.EmptyStomach)</td>
+                    <td contenteditable="true">@RenderList(Model.EarlyMorningSnack)</td>
+                    <td contenteditable="true">@RenderList(Model.Exercise)</td>
+                    <td contenteditable="true">@RenderList(Model.Breakfast)</td>
+                    <td contenteditable="true">@RenderList(Model.MidMorningSnack)</td>
+                    <td contenteditable="true">@RenderList(Model.Lunch)</td>
+                    <td contenteditable="true">@RenderList(Model.EveningSnack)</td>
+                    <td contenteditable="true">@RenderList(Model.Dinner)</td>
+                    <td contenteditable="true">@RenderList(Model.Bedtime)</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
 </div>
+<br />
+<button type="button" id="row-add" class="btn btn-success btn-sm px-4">
+    Replicate
+</button>
 
-@section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+<button type="button" id="savediet" class="btn btn-success btn-sm px-4">
+    Save
+</button>
 
-            // --- Delete Modal ---
-            const deleteModal = document.getElementById('deleteModal');
-            deleteModal?.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                const planId = button.getAttribute('data-planid');
-                const planName = button.getAttribute('data-planname');
+<a class="btn btn-secondary btn-sm px-4" asp-action="Index" asp-controller="DietPlan">Back</a>
 
-                document.getElementById('planIdInput').value = planId;
-                document.getElementById('planNameToDelete').innerText = planName;
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const tableBody = document.getElementById("diet-body");
+        let selectedRow = null;
+
+        // Row selection
+        tableBody.addEventListener("click", function (e) {
+            const row = e.target.closest("tr");
+            if (!row) return;
+
+            if (selectedRow) selectedRow.classList.remove("selected");
+            row.classList.add("selected");
+            selectedRow = row;
+        });
+
+        // Helper: get all used days except for a specific row
+        function getUsedDays(exceptRow) {
+            const used = [];
+            document.querySelectorAll("#diet-body tr").forEach(row => {
+                if (row === exceptRow) return;
+                const select = row.querySelector(".day-dropdown");
+                if (select && select.value) used.push(select.value);
             });
+            return used;
+        }
 
-            // --- Toggle Status ---
-            document.querySelectorAll(".toggle-status").forEach(chk => {
-                chk.addEventListener("change", function() {
-                    const id = parseInt(this.getAttribute("data-planid"));
-                    const current = this;
+        // Helper: populate dropdown options dynamically
+        function populateDropdown(dropdown, currentValue) {
+            const alldays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+            const usedDays = getUsedDays(dropdown.closest("tr"));
 
-                    fetch('@Url.Action("Toggle", "DietPlan")', {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "RequestVerificationToken": token
-                        },
-                        body: JSON.stringify({ id: id })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (!data.success) {
-                            alert("Failed to update status");
-                            current.checked = !current.checked;
-                        }
-                    })
-                    .catch(err => {
-                        alert("Error updating status");
-                        current.checked = !current.checked;
-                    });
+            dropdown.innerHTML = '<option value="">Select Day</option>'; // reset
+
+            alldays.forEach(day => {
+                if (!usedDays.includes(day) || day === currentValue) {
+                    const option = document.createElement("option");
+                    option.value = day;
+                    option.text = day;
+                    if (day === currentValue) option.selected = true;
+                    dropdown.appendChild(option);
+                }
+            });
+        }
+
+        // On page load: update all dropdowns to remove used days
+        document.querySelectorAll(".day-dropdown").forEach(dd => {
+            const currentValue = dd.value;
+            populateDropdown(dd, currentValue);
+        });
+
+        // Replicate row
+        document.getElementById("row-add").addEventListener("click", function () {
+            if (!selectedRow) {
+                alert("Please select a row to replicate!");
+                return;
+            }
+
+            const newRow = selectedRow.cloneNode(true);
+
+            // Reset dropdown value for new row
+            const daySelect = newRow.querySelector(".day-dropdown");
+            if (daySelect) daySelect.value = "";
+
+            // Append row first
+            tableBody.appendChild(newRow);
+
+            // Populate dropdown dynamically to exclude used days
+            if (daySelect) populateDropdown(daySelect, "");
+
+            // Scroll into view and focus dropdown
+            newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (daySelect) daySelect.focus();
+        });
+
+        // Save button
+        document.getElementById("savediet").addEventListener("click", function () {
+            const selectedConcernId = document.getElementById("concernSelect").alue;
+            if (!selectedConcernId) {
+                alert("Please select concern first.");
+                return;
+            }
+            const rows = document.querySelectorAll("#diet-body tr");
+            const dietData = [];
+
+            rows.forEach(row => {
+                // Helper: get cell data (list items)
+                const getCellData = (cellIndex) => {
+                    const listItems = row.cells[cellIndex].querySelectorAll('li');
+                    return listItems.length > 0
+                        ? Array.from(listItems).map(li => li.innerText.trim())
+                        : [row.cells[cellIndex].innerText.trim()];
+                };
+
+                // Helper: get dropdown value for DayName
+                const getDayName = (cellIndex) => {
+                    const select = row.cells[cellIndex].querySelector('select');
+                    return select ? select.value : row.cells[cellIndex].innerText.trim();
+                };
+
+                dietData.push({
+                    Id: 0,
+                    Name: "@Model.Name",
+                    ConcernId: selectedConcernId,
+                    DayName: [getDayName(0)],           // only DayName from dropdown
+                    EmptyStomach: getCellData(1),
+                    EarlyMorningSnack: getCellData(2),
+                    Exercise: getCellData(3),
+                    Breakfast: getCellData(4),
+                    MidMorningSnack: getCellData(5),
+                    Lunch: getCellData(6),
+                    EveningSnack: getCellData(7),
+                    Dinner: getCellData(8),
+                    Bedtime: getCellData(9),
+                    IsActive: true
                 });
             });
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('/DietPlan/SaveDietPlan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify(dietData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) alert("Diet plan saved successfully!");
+                else alert("Failed to save diet plan!");
+            })
+            .catch(err => console.error(err));
         });
-    </script>
-}
+
+    });
+</script>
+
