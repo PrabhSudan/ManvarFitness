@@ -39,11 +39,18 @@ namespace ManvarFitness.Controllers
             var users = await _context.AdminUsers
                 .Where(u => !u.IsDeleted)
                 .ToListAsync();
+
+            var roles = await _context.Roles
+                .Select(r => r.Name) 
+                .ToListAsync();
+
+            ViewBag.Roles = roles;
+
             return View(users);
         }
 
         // GET: UserController/Details/5
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(Guid id)
         {
             var user = await _context.AdminUsers.FindAsync(id);
             if (user == null)
@@ -68,15 +75,15 @@ namespace ManvarFitness.Controllers
             {
                 return View(model);
             }
-            var exists = await _context.AdminUsers.AnyAsync(u => u.EmailUsername == model.EmailUsername);
+            var exists = await _context.AdminUsers.AnyAsync(u => u.Name == model.Name);
             if (exists)
             {
-                ModelState.AddModelError("EmailUsername", "Email or username already exists.");
+                ModelState.AddModelError("Name", "Name already exists.");
                 return View(model);
             }
             // On create
             model.CreatedOn = DateTime.UtcNow;
-            model.CreatedBy = CurrentUserId;
+            model.CreatedBy = null;
             model.IsDeleted = false;
             _context.AdminUsers.Add(model);
             await _context.SaveChangesAsync();
@@ -84,7 +91,7 @@ namespace ManvarFitness.Controllers
         }
 
         // GET: UserController/Edit/5
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(Guid id)
         {
             var user = await _context.AdminUsers.FindAsync(id);
             if (user == null)
@@ -97,13 +104,13 @@ namespace ManvarFitness.Controllers
         // POST: UserController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, AdminUser model)
+        public async Task<IActionResult> Edit(Guid id, AdminUser model)
         {
             if (id != model.Id)
             {
                 return BadRequest();
             }
-            if (!ModelState.IsValid)
+            else if (!ModelState.IsValid)
             {
                 return View(model);
             }
@@ -112,7 +119,8 @@ namespace ManvarFitness.Controllers
             {
                 return BadRequest();
             }
-            user.EmailUsername = model.EmailUsername;
+            user.Name = model.Name;
+            user.Email = model.Email;
             user.Password = model.Password;
             user.CountryCode = model.CountryCode;
             user.Mobile = model.Mobile;
@@ -126,7 +134,7 @@ namespace ManvarFitness.Controllers
         }
 
         // GET: UserController/Delete/5
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(Guid id)
         {
             var user = await _context.AdminUsers.FindAsync(id);
             if (user == null) return NotFound();
@@ -136,7 +144,7 @@ namespace ManvarFitness.Controllers
         // POST: UserController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> Delete(Guid id, IFormCollection collection)
         {
             var user = await _context.AdminUsers.FindAsync(id);
             if (user == null) return NotFound();
@@ -144,7 +152,7 @@ namespace ManvarFitness.Controllers
             // Soft delete
             user.IsDeleted = true;
             user.UpdatedOn = DateTime.UtcNow;
-            user.UpdatedBy = 1;
+            user.UpdatedBy = CurrentUserId;
 
             await _context.SaveChangesAsync();
 
@@ -152,14 +160,14 @@ namespace ManvarFitness.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ToogleActive(int id)
+        public async Task<IActionResult> ToogleActive(Guid id)
         {
             var user = await _context.AdminUsers.FindAsync(id);
             if (user == null) return NotFound();
 
             user.IsActive = !user.IsActive;
             user.UpdatedOn = DateTime.UtcNow;
-            user.UpdatedBy = 1;
+            user.UpdatedBy = CurrentUserId;
 
             await _context.SaveChangesAsync();
 
@@ -167,14 +175,17 @@ namespace ManvarFitness.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateRole(int id, [FromBody] RoleUpdateModel model)
+        public IActionResult UpdateRole([FromBody] RoleUpdateModel model)
         {
-            var user = _context.AdminUsers.Find(id);
+            var user = _context.AdminUsers.Find(model.Id);
 
             if (user == null)
                 return Json(new { success = false });
 
             user.Role = model.Role;
+            user.UpdatedOn = DateTime.UtcNow;
+            user.UpdatedBy = CurrentUserId;
+
             _context.SaveChanges();
 
             return Json(new { success = true });

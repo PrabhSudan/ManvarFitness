@@ -32,19 +32,27 @@
     </div>
 
     <!-- Search & Filters -->
-    <div class="row mb-3 g-2">
+    <div class="row mt-3 mb-3">
         <div class="col-lg-3 col-md-4">
-            <input type="text" id="searchPlan" class="form-control w-100" placeholder="Search Result..."/>
+            <div class="input-group">
+                <input type="text" id="searchPlan" class="form-control" placeholder="Search User..." />
+                <span id="clearSearchBtn"
+                      style="position: absolute; right: 50px; top: 35%; transform: translateY(-30%);
+                             cursor: pointer; display: none; color: black; font-size: 1.1rem;">&times;</span>
+                <button class="btn btn-outline-secondary" type="button" id="searchIconBtn">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
         </div>
     </div>
-
+</div>
     <!-- TABLE -->
     <div class="table-responsive">
         <table class="table table-striped table-bordered w-100 align-middle text-center">
             <thead class="table-light">
                 <tr>
                     <th style="width:15%">UserName</th>
-                    <th class="text-center align-middle" style="width:20%">User</th>
+                    <th class="text-center align-middle" style="width:20%">Mobile</th>
                     <th style="width:20%">Concern</th>
                     <th class="text-center align-middle" style="width:20%">Results</th>
                     <th style="width:10%">Description</th>
@@ -191,11 +199,8 @@
                         <td>@result.Description</td>
                         <td>
                             <div class="form-check form-switch m-0">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       role="switch"
+                                <input class="form-check-input toggle-active" type="checkbox" role="switch"
                                        data-roleid="@result.ResultId"
-                                       id="switchRole@role.Id"
                                        @(result.IsActive ? "checked" : "") />
                                 <label class="form-check-label" for="switchRole@role.Id"></label>
 
@@ -204,8 +209,7 @@
                                     <i class="bi bi-pencil-fill text-warning"></i>
                                 </a>
                                 <button type="button" class="btn btn-sm" style="color:darkorange;"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal"
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
                                         onclick="setDeleteId(@result.ResultId)">
                                     <i class="bi bi-trash-fill"></i>
                                 </button>
@@ -238,22 +242,78 @@
         </div>
     </div>
 </div>
-@section Scripts{
+@section Scripts {
     <script>
-        // SEARCH
-        document.getElementById("searchPlan")
-            .addEventListener("keyup", function () {
-                const value = this.value.toLowerCase();
-                document.querySelectorAll("tbody tr")
-                    .forEach(row => {
-                        row.style.display =
-                            row.innerText.toLowerCase().includes(value)
-                                ? ""
-                                : "none";
-                    });
-            });
+        const searchPlan = document.getElementById("searchPlan");
+        const clearSearchBtn = document.getElementById("clearSearchBtn");
+        const searchIconBtn = document.getElementById("searchIconBtn");
+        const rows = document.querySelectorAll("table tbody tr");
 
-        // DELETE
+        // ---- SEARCH / FILTER FUNCTION ----
+        function filterResults() {
+            const searchText = searchPlan.value.toLowerCase().trim();
+
+            rows.forEach(row => {
+                const rowText = row.innerText.toLowerCase();
+                row.style.display = rowText.includes(searchText) ? "" : "none";
+            });
+        }
+
+        // ---- SHOW/HIDE CLEAR BUTTON ----
+        searchPlan.addEventListener("input", function() {
+            clearSearchBtn.style.display = this.value.trim() !== "" ? "inline" : "none";
+        });
+
+        // ---- CLEAR SEARCH INPUT ----
+        clearSearchBtn.addEventListener("click", function() {
+            searchPlan.value = "";
+            clearSearchBtn.style.display = "none";
+            filterResults();
+            searchPlan.focus();
+        });
+
+        // ---- SEARCH BUTTON CLICK ----
+        if(searchIconBtn){
+            searchIconBtn.addEventListener("click", filterResults);
+        }
+
+        // ---- ENTER KEY TRIGGERS SEARCH ----
+        searchPlan.addEventListener("keydown", function(e){
+            if(e.key === "Enter") {
+                e.preventDefault();
+                filterResults();
+            }
+        });
+
+        // ---- TOGGLE ACTIVE STATUS ----
+        document.querySelectorAll(".toggle-active").forEach(el => {
+            el.addEventListener("change", function() {
+                const resultId = this.dataset.roleid;
+                const isActive = this.checked;
+
+                fetch(`/Result/ToggleActive/${resultId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ isActive })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(!data.success) {
+                        alert("Failed to update status");
+                        this.checked = !isActive;
+                    }
+                })
+                .catch(() => {
+                    this.checked = !isActive;
+                    alert("Error updating status");
+                });
+            });
+        });
+
+        // ---- DELETE MODAL ----
         let deleteId = 0;
 
         function setDeleteId(id) {
@@ -262,12 +322,16 @@
 
         function deleteResult() {
             fetch(`/Result/Delete/${deleteId}`, {
-                method: "POST"
+                method: "POST",
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
             })
             .then(res => {
-                if (res.ok) location.reload();
+                if(res.ok) location.reload();
                 else alert("Error deleting record");
-            });
+            })
+            .catch(() => alert("Error deleting record"));
         }
     </script>
 }

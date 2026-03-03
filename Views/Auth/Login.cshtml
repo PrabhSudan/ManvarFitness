@@ -122,8 +122,8 @@
             <input type="password" name="fakepasswordremembered" style="display:none">
 
             <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="email" name="emailUsername"  placeholder="Email or Username" autocomplete="email" required>
-                <label for="emailUsername">Email or Username</label>
+                <input type="text" class="form-control" id="email" name="email"  placeholder="Email" autocomplete="email" required>
+                <label for="email">Email</label>
             </div>
 
             <div class="form-floating mb-3 position-relative">
@@ -132,11 +132,6 @@
                 <span class="position-absolute top-50 end-0 translate-middle-y pe-3 cursor-pointer" onclick="togglePassword('password','eyeIcon1')">
                 </span>
             </div>
-
-            <div class="forgot-link">
-                <a asp-controller="Auth" asp-action="ForgotPassword">Forgot Password?</a>
-            </div>
-
 
             <button type="submit" class="btn btn-login w-100">Login</button>
         </form>

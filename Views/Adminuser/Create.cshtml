@@ -9,8 +9,13 @@
     @Html.AntiForgeryToken()
 
     <div class="mb-3" style="max-width: 400px;">
-        <label>Email/Username</label>
-        <input type="text" name="EmailUsername" class="form-control" required />
+        <label>Name</label>
+        <input type="text" name="Name" class="form-control" required />
+    </div>
+
+    <div class="mb-3" style="max-width: 400px;">
+        <label>Email</label>
+        <input type="text" name="Email" class="form-control" required />
     </div>
 
     <div class="mb-3" style="max-width: 400px;">
@@ -22,8 +27,8 @@
         <div class="col-4">
             <label>Country Code</label>
             <select name="CountryCode" class="form-control" required>
-                <option value="+1">+1 (USA)</option>
                 <option value="+91">+91 (India)</option>
+                <option value="+1">+1 (USA)</option>
                 <option value="+44">+44 (UK)</option>
                 <option value="+61">+61 (Australia)</option>
                 <option value="+81">+81 (Japan)</option>

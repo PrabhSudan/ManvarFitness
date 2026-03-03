@@ -27,10 +27,9 @@
     <div class="row mt-3 mb-3">
         <div class="col-lg-3 col-md-4">
             <div class="input-group">
-                @* <div class="position-relative"> *@
                     <input type="text" id="searchPlan" class="form-control" placeholder="Search User..." />
                     <span id="clearSearchBtn"
-                          style="position: absolute; right: 50px; top: 20%; transform: translateY(-30%);
+                          style="position: absolute; right: 50px; top: 35%; transform: translateY(-30%);
                              cursor: pointer; display: none; color: black; font-size: 1.1rem;">&times;</span>
                     <button class="btn btn-outline-secondary" type="button" id="searchIconBtn">
                         <i class="bi bi-search"></i>
@@ -44,21 +43,21 @@
         <table class="table table-striped table-bordered align-middle">
             <thead class="table-light">
                 <tr>
-                    <th class="d-none d-md-table-cell" style="width:10%">ID</th>
-                    <th style="width:20%">EmailUsername</th>
+                <th style="width:10%">Name</th>
+                    <th style="width:20%">Email</th>
                     <th class="d-none d-md-table-cell" style="width:10%">Password</th>
-                    <th style="width:15%">Role</th>
+                    <th style="width:10%">Role</th>
                     <th style="width:15%">Mobile</th>
                     <th style="width:10%">Status</th>
-                    <th style="width:20%">Actions</th>
+                    <th style="width:15%">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in Model)
                 {
                     <tr>
-                        <td class="d-none d-md-table-cell">@user.Id</td>
-                        <td >@user.EmailUsername</td>
+                        <td class="fw-semibold">@user.Name</td>
+                        <td >@user.Email</td>
                         <td class="d-none d-md-table-cell position relative">
                             <span id="password-@user.Id"class="masked-password">
                                 ••••••••
@@ -73,28 +72,24 @@
                                 </span>
 
                                 <!-- Dropdown (Hidden by default) -->
-                                <select class="form-select form-select-sm role-dropdown d-none"
-                                        data-userid="@user.Id"
-                                        id="role-select-@user.Id"
-                                        style="width:120px;">
-
-                                    <option value="Admin" selected="@(user.Role == "Admin" ? "selected" : null)">
-                                        Admin
+                            <select class="form-select form-select-sm role-dropdown d-none"
+                                    data-userid="@user.Id"
+                                    id="role-select-@user.Id"
+                                    style="width:120px;">
+                                @foreach (var role in ViewBag.Roles as List<string>)
+                                {
+                                    <option value="@role" selected="@(user.Role == role ? "selected" : null)">
+                                        @role
                                     </option>
+                                }
+                            </select>
 
-                                    <option value="Coach" selected="@(user.Role == "Coach" ? "selected" : null)">
-                                        Coach
-                                    </option>
-                                </select>
-
-                                <button type="button"
-                                        class="btn btn-sm btn-light border"
-                                        onclick="enableRoleEdit(@user.Id)"
-                                        style="padding:4px 6px; color:darkorange">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </button>
-
-
+                            <button type="button"
+                                    class="btn btn-sm btn-light border"
+                                    onclick="enableRoleEdit('@user.Id')"
+                                    style="padding:4px 6px; color:darkorange">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
                             </div>
                         </td>
 
@@ -115,7 +110,6 @@
                         </td>
                         <td>
                             <div class="d-flex gap-2">
-
                                 <!-- Details -->
                                 <a asp-action="Details"
                                    asp-route-id="@user.Id"
@@ -148,10 +142,9 @@
             </tbody>
         </table>
     </div>
-</div>
 @section Scripts {
     <script>
-               const searchPlan = document.getElementById("searchPlan");
+        const searchPlan = document.getElementById("searchPlan");
         const searchIconBtn = document.getElementById("searchIconBtn");
         const addUserContainer = document.getElementById("addUserContainer");
         const clearSearchBtn = document.getElementById("clearSearchBtn");
@@ -178,10 +171,7 @@
 
         // Show/hide clear button
         searchPlan.addEventListener("input", function() {
-            if (this.value.trim() !== "") clearSearchBtn.style.display = "inline";
-            else clearSearchBtn.style.display = "none";
-
-            filterUsers();
+            clearSearchBtn.style.display = this.value.trim() !== "" ? "inline":"none";
         });
 
         // Clear input when clicking ×
@@ -197,6 +187,14 @@
             filterUsers();
         });
 
+        //Enter key triggers search
+        searchPlan.addEventListener("keydown",function(e)
+        {
+            if(e.key === "Enter"){
+                e.preventDefault();
+                filterUsers();
+            }
+        })
         // Toggle Active Status
         function toggleActive(el) {
             const userId = el.dataset.userid;
@@ -253,14 +251,16 @@
                     roleTextEl.classList.remove("d-none");
                     return;
                 }
-
-                fetch(`/AdminUser/UpdateRole/${userId}`, {
+                fetch(`/AdminUser/UpdateRole`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                     },
-                    body: JSON.stringify({ role: selectedRole })
+                    body: JSON.stringify({
+                        id: userId,
+                        role: selectedRole
+                    })
                 })
                 .then(res => res.json())
                 .then(data => {

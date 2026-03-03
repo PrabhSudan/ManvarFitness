@@ -4,8 +4,8 @@ namespace ManvarFitness.Models
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "Email or username is required.")]
-        public string? EmailUsername { get; set; }
+        [Required(ErrorMessage = "Email is required.")]
+        public string? Email { get; set; }
         [Required(ErrorMessage = "Password is required.")]
         public string? Password { get; set; }
     }

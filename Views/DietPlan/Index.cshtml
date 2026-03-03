@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Html
+@using ManvarFitness.Entity
 @model ManvarFitness.Models.DietPlanModel
 
 @{
@@ -7,11 +8,11 @@
         : "Diet Plan Details - " + Model.Concern.Name;
 
     var alldays = new List<string> { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
-    // Helper function to render lists
+
     Func<List<string>, IHtmlContent> RenderList = items =>
     {
         var ul = "<ol>";
-        if (items != null || items.Any())
+        if (items != null && items.Any())
         {
             foreach (var item in items)
                 ul += $"<li>{item}</li>";
@@ -23,8 +24,8 @@
         ul += "</ol>";
         return Html.Raw(ul);
     };
-
 }
+
 <style>
     .table th {
         vertical-align: text-top;
@@ -35,27 +36,34 @@
     .table td {
         vertical-align: top;
         text-align: left;
-        line-padding: 1px;
     }
 
     .diet-table {
-        min-width: 350px; /* force horizontal scroll */
+        min-width: 350px;
+        overflow-x: auto;
     }
 
-        .diet-table th,
-        .diet-table td {
-            min-width: 200px; /* increase column width */
-        }
+    .diet-table th,
+    .diet-table td {
+        min-width: 200px;
+    }
+
+    tr.selected {
+        background-color: white !important; 
+    }
+
 </style>
+
 @Html.AntiForgeryToken()
 
 <form method="get" asp-action="Index" class="mb-3">
-    <label for="form-label bold-sm">Select Concern:</label>
+    <!-- Main Concern -->
+    <label for="concernSelect" class="form-label">Select Concern:</label>
     <select id="concernSelect" name="concernId" class="form-select w-50" onchange="this.form.submit()">
         <option value="">-- Select Concern --</option>
-        @foreach(var c in ViewBag.ConcernsList)
+        @foreach (var c in ViewBag.ConcernsList)
         {
-            if(Model.ConcernId == c.ConcernId)
+            if (Model.ConcernId == c.ConcernId)
             {
                 <option value="@c.ConcernId" selected>@c.Name</option>
             }
@@ -65,8 +73,31 @@
             }
         }
     </select>
+
+    <!-- Sub-Concern: show only if there are sub-concerns -->
+    @if (ViewBag.SubConcernsList != null && ((List<SubConcerns>)ViewBag.SubConcernsList).Any())
+    {
+        <div class="mt-3">
+            <label for="subconcernSelect" class="form-label">Select Sub Concern:</label>
+            <select id="subconcernSelect" name="subconcernId" class="form-select w-50" onchange="this.form.submit()">
+                <option value="">-- Select Sub Concern --</option>
+                @foreach (var sc in (List<SubConcerns>)ViewBag.SubConcernsList)
+                {
+                    if (Model.SubConcernId == sc.SubConcernId)
+                    {
+                        <option value="@sc.SubConcernId" selected>@sc.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@sc.SubConcernId">@sc.Name</option>
+                    }
+                }
+            </select>
+        </div>
+    }
 </form>
-<h2> @ViewData["Title"]</h2>
+
+<h2>@ViewData["Title"]</h2>
 
 <div style="overflow-x: auto;">
     <table class="table table-bordered diet-table">
@@ -84,65 +115,67 @@
                 <th>Bedtime</th>
             </tr>
         </thead>
-        <tbody class="top-0" id="diet-body">
-            @for (int i = 0; i < Model.DayName.Count; i++)
+        <tbody id="diet-body">
+            @for (int i = 0; i < Model.Days.Count; i++)
             {
-                var currentDay = Model.DayName[i];
+                var day = Model.Days[i];
+                if (string.IsNullOrEmpty(day.DayName))
+                {
+                    day.DayName = alldays[i % alldays.Count]; // default day
+                }
                 <tr>
-
                     <td>
                         <select class="day-dropdown">
                             <option value="">Select Day</option>
-                            @foreach (var day in alldays)
+                            @foreach(var d in alldays)
                             {
-                                var selected = day == currentDay ? "selected" : null;
-                                <option value="@day" selected="@(day! == currentDay ? "selected" : null)">@day</option>
+                                if (d == day.DayName)
+                                {
+                                    <option value="@d" selected>@d</option>
+                                }
+                                else
+                                {
+                                    <option value="@d">@d</option>
+                                }
                             }
                         </select>
                     </td>
-                    <td contenteditable="true">@RenderList(Model.EmptyStomach)</td>
-                    <td contenteditable="true">@RenderList(Model.EarlyMorningSnack)</td>
-                    <td contenteditable="true">@RenderList(Model.Exercise)</td>
-                    <td contenteditable="true">@RenderList(Model.Breakfast)</td>
-                    <td contenteditable="true">@RenderList(Model.MidMorningSnack)</td>
-                    <td contenteditable="true">@RenderList(Model.Lunch)</td>
-                    <td contenteditable="true">@RenderList(Model.EveningSnack)</td>
-                    <td contenteditable="true">@RenderList(Model.Dinner)</td>
-                    <td contenteditable="true">@RenderList(Model.Bedtime)</td>
+                    <td contenteditable="true">@RenderList(day.EmptyStomach)</td>
+                    <td contenteditable="true">@RenderList(day.EarlyMorningSnack)</td>
+                    <td contenteditable="true">@RenderList(day.Exercise)</td>
+                    <td contenteditable="true">@RenderList(day.Breakfast)</td>
+                    <td contenteditable="true">@RenderList(day.MidMorningSnack)</td>
+                    <td contenteditable="true">@RenderList(day.Lunch)</td>
+                    <td contenteditable="true">@RenderList(day.EveningSnack)</td>
+                    <td contenteditable="true">@RenderList(day.Dinner)</td>
+                    <td contenteditable="true">@RenderList(day.Bedtime)</td>
                 </tr>
             }
-
         </tbody>
     </table>
 </div>
+
 <br />
-<button type="button" id="row-add" class="btn btn-success btn-sm px-4">
-    Replicate
-</button>
 
-<button type="button" id="savediet" class="btn btn-success btn-sm px-4">
-    Save
-</button>
-
+<button type="button" id="row-add" class="btn btn-success btn-sm px-4">Replicate</button>
+<button type="button" id="savediet" class="btn btn-success btn-sm px-4">Save</button>
 <a class="btn btn-secondary btn-sm px-4" asp-action="Index" asp-controller="DietPlan">Back</a>
-
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-
         const tableBody = document.getElementById("diet-body");
         let selectedRow = null;
+        const alldays = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 
-        // Row selection
+        // ROW SELECTION
         tableBody.addEventListener("click", function (e) {
             const row = e.target.closest("tr");
             if (!row) return;
-
             if (selectedRow) selectedRow.classList.remove("selected");
             row.classList.add("selected");
             selectedRow = row;
         });
 
-        // Helper: get all used days except for a specific row
+        // GET USED DAYS EXCEPT CURRENT ROW
         function getUsedDays(exceptRow) {
             const used = [];
             document.querySelectorAll("#diet-body tr").forEach(row => {
@@ -153,84 +186,103 @@
             return used;
         }
 
-        // Helper: populate dropdown options dynamically
+        // POPULATE DROPDOWN
         function populateDropdown(dropdown, currentValue) {
-            const alldays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
             const usedDays = getUsedDays(dropdown.closest("tr"));
-
-            dropdown.innerHTML = '<option value="">Select Day</option>'; // reset
-
+            dropdown.innerHTML = '<option value="">Select Day</option>';
             alldays.forEach(day => {
                 if (!usedDays.includes(day) || day === currentValue) {
                     const option = document.createElement("option");
                     option.value = day;
                     option.text = day;
-                    if (day === currentValue) option.selected = true;
+                    if(day === currentValue) option.selected = true;
                     dropdown.appendChild(option);
                 }
             });
         }
 
-        // On page load: update all dropdowns to remove used days
-        document.querySelectorAll(".day-dropdown").forEach(dd => {
-            const currentValue = dd.value;
-            populateDropdown(dd, currentValue);
-        });
+        // INITIALIZE DROPDOWNS
+        document.querySelectorAll(".day-dropdown").forEach(dd => populateDropdown(dd, dd.value));
 
-        // Replicate row
-        document.getElementById("row-add").addEventListener("click", function () {
-            if (!selectedRow) {
-                alert("Please select a row to replicate!");
-                return;
-            }
+        // FUNCTION TO REORDER ROWS IN DOM
+        function reorderRows() {
+            const rows = Array.from(document.querySelectorAll("#diet-body tr"));
+            const rowsByDay = {};
+            rows.forEach(r => {
+                const day = r.querySelector(".day-dropdown").value;
+                if (day) rowsByDay[day] = r;
+            });
+            alldays.forEach(day => {
+                if (rowsByDay[day]) tableBody.appendChild(rowsByDay[day]);
+            });
+        }
+
+        // REPLICATE ROW
+        document.getElementById("row-add").addEventListener("click", function() {
+            if (!selectedRow) { alert("Select a row to replicate!"); return; }
 
             const newRow = selectedRow.cloneNode(true);
+            newRow.classList.remove("selected");
 
-            // Reset dropdown value for new row
             const daySelect = newRow.querySelector(".day-dropdown");
-            if (daySelect) daySelect.value = "";
+            if(daySelect) {
+                const currentValue = daySelect.value;
+                const usedDays = Array.from(document.querySelectorAll("#diet-body .day-dropdown"))
+                                      .filter(dd => dd !== daySelect)
+                                      .map(dd => dd.value)
+                                      .filter(v => v);
 
-            // Append row first
-            tableBody.appendChild(newRow);
+                // Assign original day if free, else next available day in order
+                const assignedDay = currentValue && !usedDays.includes(currentValue)
+                                    ? currentValue
+                                    : alldays.find(d => !usedDays.includes(d)) || "";
 
-            // Populate dropdown dynamically to exclude used days
-            if (daySelect) populateDropdown(daySelect, "");
+                populateDropdown(daySelect, assignedDay);
+            }
 
-            // Scroll into view and focus dropdown
-            newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            if (daySelect) daySelect.focus();
+            // Insert after selected row
+            selectedRow.parentNode.insertBefore(newRow, selectedRow.nextSibling);
+
+            selectedRow.classList.remove("selected");
+            selectedRow = null;
+
+            // Reorder rows to maintain Monday → Sunday
+            reorderRows();
+
+            newRow.scrollIntoView({ behavior:"smooth", block:"center" });
         });
 
-        // Save button
-        document.getElementById("savediet").addEventListener("click", function () {
-            const selectedConcernId = document.getElementById("concernSelect").alue;
-            if (!selectedConcernId) {
-                alert("Please select concern first.");
-                return;
-            }
+        // SAVE DIET PLAN
+        document.getElementById("savediet").addEventListener("click", function() {
+            const concernId = document.getElementById("concernSelect").value;
+            if(!concernId) { alert("Select concern first."); return; }
+
+            const subSelect = document.getElementById("subconcernSelect");
+            const subConcernId = subSelect ? parseInt(subSelect.value) : 0;
+
             const rows = document.querySelectorAll("#diet-body tr");
-            const dietData = [];
+            const dietPlan = {
+                Name: "@Model.Name",
+                ConcernId: parseInt(concernId),
+                SubConcernId: subConcernId,
+                Days: []
+            };
 
             rows.forEach(row => {
-                // Helper: get cell data (list items)
-                const getCellData = (cellIndex) => {
-                    const listItems = row.cells[cellIndex].querySelectorAll('li');
-                    return listItems.length > 0
-                        ? Array.from(listItems).map(li => li.innerText.trim())
-                        : [row.cells[cellIndex].innerText.trim()];
+                const dayDropdown = row.querySelector(".day-dropdown");
+                const dayName = dayDropdown ? dayDropdown.value : "";
+                if(!dayName) return;
+
+                const getCellData = idx => {
+                    const cell = row.cells[idx];
+                    const lis = cell.querySelectorAll("li");
+                    if(lis.length > 0) return Array.from(lis).map(li => li.innerText.trim()).filter(t => t);
+                    const text = cell.innerText.trim();
+                    return text ? [text] : [];
                 };
 
-                // Helper: get dropdown value for DayName
-                const getDayName = (cellIndex) => {
-                    const select = row.cells[cellIndex].querySelector('select');
-                    return select ? select.value : row.cells[cellIndex].innerText.trim();
-                };
-
-                dietData.push({
-                    Id: 0,
-                    Name: "@Model.Name",
-                    ConcernId: selectedConcernId,
-                    DayName: [getDayName(0)],           // only DayName from dropdown
+                dietPlan.Days.push({
+                    DayName: dayName,
                     EmptyStomach: getCellData(1),
                     EarlyMorningSnack: getCellData(2),
                     Exercise: getCellData(3),
@@ -244,6 +296,8 @@
                 });
             });
 
+            if(dietPlan.Days.length === 0) { alert("No valid day selected to save."); return; }
+
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
             fetch('/DietPlan/SaveDietPlan', {
@@ -252,16 +306,20 @@
                     'Content-Type': 'application/json',
                     'RequestVerificationToken': token
                 },
-                body: JSON.stringify(dietData)
+                body: JSON.stringify(dietPlan)
             })
             .then(res => res.json())
             .then(data => {
-                if (data.success) alert("Diet plan saved successfully!");
-                else alert("Failed to save diet plan!");
+                if(data.success) {
+                    alert("Diet plan saved!");
+                    location.reload();
+                } else {
+                    alert("Failed to save diet plan!");
+                    console.error(data);
+                }
             })
             .catch(err => console.error(err));
         });
 
     });
 </script>
-

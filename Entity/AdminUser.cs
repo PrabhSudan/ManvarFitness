@@ -7,15 +7,17 @@ namespace ManvarFitness.Entity
     public class AdminUser:BaseEntity
     {
         [Key]
-        public int Id { get; set; }
-        public string? EmailUsername { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string? Name { get; set; }
+        public string? Email { get; set; }
         public string? Password { get; set; }
 
         // Filled AFTER login (profile update)
         public string? Role  {get; set; }
-        public string CountryCode { get; set; } = string.Empty;
-
-        public string Mobile { get; set; } = string.Empty;
+        [Required]
+        public string CountryCode { get; set; }
+        [Required]
+        public string Mobile { get; set; } 
         public bool IsActive { get; set; } 
     }
 }

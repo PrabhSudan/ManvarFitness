@@ -6,7 +6,7 @@
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     var role = Context.Session.GetString("UserRole");
-    var userName = Context.Session.GetString("UserName") ?? "User";
+    var Name = Context.Session.GetString("Name") ?? "User";
     // for pages
     var allowedPageUrls = _context.RolePages
         .Where(rp => rp.RoleName == role && rp.IsActive)
@@ -59,7 +59,7 @@
                  aria-labelledby="profileDropdown" style="min-width: 200px;">
                 <div class="card border-0 rounded-3">
                     <div class="card-body p-3" style="background-color: #fff;">
-                        <h6 class="card-title mb-2" style="color: #333;">Name: @userName</h6>
+                        <h6 class="card-title mb-2" style="color: #333;">Name: @Name</h6>
 
                         <h6 class="card-title mb-2" style="color: #333;">Role: @role</h6>
 

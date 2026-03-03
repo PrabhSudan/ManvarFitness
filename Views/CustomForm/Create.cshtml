@@ -1,86 +1,322 @@
 ﻿@model ManvarFitness.Models.CustomFormModel
+<style>
+    body {
+        background-color: ghostwhite;
+    }
 
-<h2>Create Custom Form</h2>
+    .card {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+    }
 
-<form asp-action="Create" method="post">
-    @Html.AntiForgeryToken()
+    .card-body h2 {
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
 
-    <!-- Main Concern -->
-    <div class="form-group mb-3">
-        <label asp-for="ConcernId" class="form-label">Select Main Concern</label>
-        <select asp-for="ConcernId" class="form-select" id="ConcernDropdown" asp-items="ViewBag.ConcernsList">
-            <option value="">-- Select Concern --</option>
-        </select>
-        <span asp-validation-for="ConcernId" class="text-danger"></span>
-    </div>
+    .form-label {
+        min-width: 150px;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
 
-    <!-- Sub Concern -->
-    <div class="form-group mb-3">
-        <label asp-for="SubConcernId" class="form-label">Select Sub Concern</label>
-        <select asp-for="SubConcernId" class="form-select" id="SubConcernDropdown" asp-items="ViewBag.SubConcernsList">
-            <option value="">-- Select Sub Concern --</option>
-        </select>
-        <span asp-validation-for="SubConcernId" class="text-danger"></span>
-    </div>
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
 
-    <!-- Dynamic Fields -->
-    <h5>Fields</h5>
-    <div id="fields-container">
-        <div class="field-item mb-2 d-flex align-items-center gap-2">
-            <input name="Fields[0].Label" class="form-control me-2" placeholder="Field Name" required />
+    .field-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 0;
+        flex-wrap: nowrap;
+    }
 
-            <select name="Fields[0].FieldType" class="form-select field-type me-2">
-                <option value="">Select FieldType</option>
-                <option value="Text">Text</option>
-                <option value="Number">Number</option>
-                <option value="Select">Select</option>
-                <option value="Radio">Radio</option>
-                <option value="Checkbox">Checkbox</option>
-                <option value="Date">Date</option>
-                <option value="File">File</option>
-            </select>
+    .form-control {
+        border-radius: 10px;
+        padding: 8px 12px;
+        background-color: #ffffff;
+        border: 1px solid #ced4da;
+        min-width: 120px;
+        flex: 1 1 auto;
+    }
 
-            <!-- Number Range -->
-            <div class="number-range d-none d-flex gap-2">
-                <input name="Fields[0].MinValue" class="form-control" placeholder="Min" />
-                <input name="Fields[0].MaxValue" class="form-control" placeholder="Max" />
-            </div>
+    .form-control:focus {
+        border-color: #ced4da;
+        box-shadow: 0 0 0 0.1rem rgba(0,0,0,0.08);
+    }
 
-            <button type="button" class="btn btn-success btn-sm add-field">+</button>
+    .number-range,
+    .text-maxlength,
+    .options-box {
+        display: flex;
+        gap: 4px;
+        flex: 2 1 auto;
+        align-items: center;
+    }
+
+    .number-range input,
+    .text-maxlength input,
+    .options-box input {
+        flex: 1 1 auto;
+    }
+
+    .field-item .add-field,
+    .field-item .add-option,
+    .field-item .remove-field {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        flex: 0 0 auto;
+    }
+
+    .text-danger {
+        font-size: 0.875rem;
+    }
+
+    .action-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-top: 1.5rem;
+    }
+
+    .action-row .btn {
+        width: 120px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        border-radius: 8px;
+    }
+
+    .card-body {
+        padding: 1rem 1.2rem;
+    }
+
+    /* Custom Dropdown */
+    .custom-select-wrapper {
+        position: relative;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .custom-select-selected {
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 10px;
+        padding: 8px 12px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .custom-select-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        max-height: 8rem; /* ~5-7 items */
+        overflow-y: auto;
+        display: none;
+        z-index: 1000;
+    }
+
+    .custom-select-options div {
+        padding: 8px 12px;
+        cursor: pointer;
+    }
+
+    .custom-select-options div:hover {
+        background-color: #f1f1f1;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-4">
+            <h2>Create Custom Field</h2>
+
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="form-row d-flex gap-3">
+                    <!-- Concern -->
+                    <div class="form-group flex-fill">
+                        <label class="form-label">Select Main Concern</label>
+                        <div class="custom-select-wrapper" id="ConcernWrapper">
+                            <div class="custom-select-selected">-- Select Concern --</div>
+                            <div class="custom-select-options">
+                                @foreach(var item in ViewBag.ConcernsList)
+                                {
+                                    <div data-value="@item.Value">@item.Text</div>
+                                }
+                            </div>
+                            <select asp-for="ConcernId" class="d-none" id="ConcernId">
+                                <option value="">-- Select Concern --</option>
+                                @foreach(var item in ViewBag.ConcernsList)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="ConcernId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Sub Concern -->
+                    <div class="form-group flex-fill">
+                        <label class="form-label">Select Sub Concern</label>
+                        <div class="custom-select-wrapper" id="SubConcernWrapper">
+                            <div class="custom-select-selected">-- Select Sub Concern --</div>
+                            <div class="custom-select-options"></div>
+                            <select asp-for="SubConcernId" class="d-none" id="SubConcernId">
+                                <option value="">-- Select Sub Concern --</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="SubConcernId" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <h5>Fields</h5>
+                <div id="fields-container">
+                    <div class="field-item mb-2 d-flex align-items-center gap-2">
+                        <input name="Fields[0].Label" class="form-control me-2" placeholder="Field Name" required />
+                        <select name="Fields[0].FieldType" class="form-control field-type me-2">
+                            <option value="">Select FieldType</option>
+                            <option value="Text">Text</option>
+                            <option value="Number">Number</option>
+                            <option value="Select">Select</option>
+                            <option value="Radio">Radio</option>
+                            <option value="Checkbox">Checkbox</option>
+                            <option value="Date">Date</option>
+                            <option value="File">File</option>
+                        </select>
+                        <div class="number-range d-none d-flex gap-2">
+                            <input name="Fields[0].MinValue" class="form-control" placeholder="Min" />
+                            <input name="Fields[0].MaxValue" class="form-control" placeholder="Max" />
+                        </div>
+                        <div class="text-maxlength d-none d-flex gap-2">
+                            <input name="Fields[0].MaxLength" class="form-control" placeholder="Enter Max Length" />
+                        </div>
+                        <div class="options-box d-none d-flex gap-2">
+                            <input name="Fields[0].Options" class="form-control" placeholder="Enter options" />
+                            <button type="button" class="btn btn-success btn-sm add-option">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-row">
+                    <button type="button" class="btn btn-success btn-sm add-field">Add</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                </div>
+            </form>
         </div>
     </div>
-
-    <button type="submit" id="saveform" class="btn btn-primary mt-3">Save</button>
-</form>
+</div>
 
 @section Scripts {
     <script>
-        let fieldIndex = 1;
+        // -------- Custom Selects --------
+        function setupCustomSelect(wrapperId, hiddenSelectId){
+            const wrapper=document.getElementById(wrapperId);
+            const selected=wrapper.querySelector('.custom-select-selected');
+            const optionsContainer=wrapper.querySelector('.custom-select-options');
+            const hiddenSelect=document.getElementById(hiddenSelectId);
 
-        // Load SubConcerns dynamically
-        document.getElementById("ConcernDropdown").addEventListener("change", function () {
-            const concernId = this.value;
+            selected.addEventListener('click', e=>{
+                e.stopPropagation();
+                document.querySelectorAll('.custom-select-options').forEach(el=>{
+                    if(el!==optionsContainer) el.style.display='none';
+                });
+                optionsContainer.style.display = optionsContainer.style.display==='block'?'none':'block';
+            });
+
+            optionsContainer.addEventListener('click', e=>{
+                if(e.target.dataset.value){
+                    selected.textContent=e.target.textContent;
+                    hiddenSelect.value=e.target.dataset.value;
+                    hiddenSelect.dispatchEvent(new Event('change'));
+                    optionsContainer.style.display='none';
+                }
+            });
+
+            document.addEventListener('click', ()=> optionsContainer.style.display='none');
+        }
+
+        setupCustomSelect('ConcernWrapper','ConcernId');
+        setupCustomSelect('SubConcernWrapper','SubConcernId');
+
+        // Populate SubConcerns dynamically
+        document.getElementById('ConcernId').addEventListener('change', function(){
+            const concernId=this.value;
             fetch(`/CustomForm/GetSubConcerns?concernId=${concernId}`)
-                .then(res => res.json())
-                .then(data => {
-                    const subDropdown = document.getElementById("SubConcernDropdown");
-                    subDropdown.innerHTML = '<option value="">-- Select Sub Concern --</option>';
-                    data.forEach(item => {
-                        subDropdown.innerHTML += `<option value="${item.subConcernId}">${item.name}</option>`;
+                .then(res=>res.json())
+                .then(data=>{
+                    const subWrapper=document.getElementById('SubConcernWrapper');
+                    const optionsContainer=subWrapper.querySelector('.custom-select-options');
+                    const hiddenSelect=document.getElementById('SubConcernId');
+
+                    optionsContainer.innerHTML='';
+                    hiddenSelect.innerHTML='<option value="">-- Select Sub Concern --</option>';
+
+                    data.forEach(item=>{
+                        const div=document.createElement('div');
+                        div.dataset.value=item.subConcernId;
+                        div.textContent=item.name;
+                        optionsContainer.appendChild(div);
+
+                        const opt=document.createElement('option');
+                        opt.value=item.subConcernId;
+                        opt.textContent=item.name;
+                        hiddenSelect.appendChild(opt);
                     });
+
+                    subWrapper.querySelector('.custom-select-selected').textContent='-- Select Sub Concern --';
+                    hiddenSelect.value='';
                 });
         });
 
-        // Add / Remove Fields dynamically
-        document.getElementById("fields-container").addEventListener("click", function(e) {
-            if (e.target.classList.contains("add-field")) {
-                const container = document.getElementById("fields-container");
-                const div = document.createElement("div");
-                div.classList.add("field-item", "mb-2", "d-flex", "align-items-center", "gap-2");
+        // -------- Dynamic Fields --------
+        let fieldIndex=1;
+        const fieldsContainer=document.getElementById("fields-container");
+        const form=document.querySelector("form");
 
-                div.innerHTML = `
-                    <input name="Fields[${fieldIndex}].Label" class="form-control me-2" placeholder="Field Name" required/>
-                    <select name="Fields[${fieldIndex}].FieldType" class="form-select field-type me-2">
+        fieldsContainer.addEventListener("click", function(e){
+            if(e.target.classList.contains("add-option")){
+                const parent=e.target.closest(".options-box");
+                const newInput=document.createElement("input");
+                newInput.type="text";
+                newInput.className="form-control";
+                newInput.placeholder="Enter options";
+                const removeBtn=document.createElement("button");
+                removeBtn.type="button";
+                removeBtn.className="btn btn-danger btn-sm remove-option";
+                removeBtn.textContent="-";
+                const wrapper=document.createElement("div");
+                wrapper.style.display="flex";
+                wrapper.style.alignItems="center";
+                wrapper.style.gap="4px";
+                wrapper.appendChild(newInput);
+                wrapper.appendChild(removeBtn);
+                parent.insertBefore(wrapper,e.target);
+            }
+            if(e.target.classList.contains("remove-option")) e.target.closest("div").remove();
+            if(e.target.classList.contains("add-field")){
+                const div=document.createElement("div");
+                div.classList.add("field-item","mb-3","d-flex","align-items-center","gap-2");
+                div.innerHTML=`
+                    <input name="Fields[${fieldIndex}].Label" class="form-control" placeholder="Field Name" maxlength="100" required />
+                    <select name="Fields[${fieldIndex}].FieldType" class="form-control field-type">
                         <option value="">Select FieldType</option>
                         <option value="Text">Text</option>
                         <option value="Number">Number</option>
@@ -91,48 +327,67 @@
                         <option value="File">File</option>
                     </select>
                     <div class="number-range d-none d-flex gap-2">
-                        <input name="Fields[${fieldIndex}].MinValue" class="form-control" placeholder="Min"/>
-                        <input name="Fields[${fieldIndex}].MaxValue" class="form-control" placeholder="Max"/>
+                        <input name="Fields[${fieldIndex}].MinValue" class="form-control" placeholder="Min" />
+                        <input name="Fields[${fieldIndex}].MaxValue" class="form-control" placeholder="Max" />
                     </div>
+                    <div class="text-maxlength d-none d-flex gap-2">
+                        <input name="Fields[${fieldIndex}].MaxLength" type="number" class="form-control" placeholder="Enter Max Length" />
+                    </div>
+                    <div class="options-box d-none d-flex gap-2">
+                        <input name="Fields[${fieldIndex}].Options" class="form-control" placeholder="Enter options" />
+                    </div>
+                    <button type="button" class="btn btn-success btn-sm add-option">Add</button>
                     <button type="button" class="btn btn-danger btn-sm remove-field">-</button>
                 `;
-                container.appendChild(div);
+                fieldsContainer.appendChild(div);
                 fieldIndex++;
             }
-
-            if (e.target.classList.contains("remove-field")) {
+            if(e.target.classList.contains("remove-field")){
                 e.target.closest(".field-item").remove();
+                reIndexFields();
             }
         });
 
-        // Show / Hide Number Range dynamically
-        document.getElementById("fields-container").addEventListener("change", function(e) {
-            if (!e.target.classList.contains("field-type")) return;
-
-            const parent = e.target.closest(".field-item");
-            const numberRange = parent.querySelector(".number-range");
-
-            if (numberRange) {
-                numberRange.classList.add("d-none"); // hide by default
-                if (e.target.value === "Number") numberRange.classList.remove("d-none");
-            }
+        fieldsContainer.addEventListener("change", function(e){
+            if(!e.target.classList.contains("field-type")) return;
+            const parent=e.target.closest(".field-item");
+            const numberRange=parent.querySelector(".number-range");
+            const textMax=parent.querySelector(".text-maxlength");
+            const optionsBox=parent.querySelector(".options-box");
+            numberRange?.classList.add("d-none");
+            textMax?.classList.add("d-none");
+            optionsBox?.classList.add("d-none");
+            if(e.target.value==="Number") numberRange?.classList.remove("d-none");
+            if(e.target.value==="Text") textMax?.classList.remove("d-none");
+            if(["Select","Radio","Checkbox"].includes(e.target.value)) optionsBox?.classList.remove("d-none");
         });
 
-        // Re-index fields before submit
-        function reIndexFields() {
-            const items = document.querySelectorAll("#fields-container .field-item");
-            items.forEach((item, index) => {
-                item.querySelectorAll("input, select").forEach(input => {
-                    if (input.name) {
-                        input.name = input.name.replace(/Fields\[\d+\]/, `Fields[${index}]`);
-                    }
+        function reIndexFields(){
+            const items=document.querySelectorAll("#fields-container .field-item");
+            items.forEach((item,index)=>{
+                item.querySelectorAll("input,select").forEach(input=>{
+                    if(input.name) input.name=input.name.replace(/Fields\[\d+\]/,`Fields[${index}]`);
                 });
+                const optionInputs=item.querySelectorAll(".options-box input");
+                optionInputs.forEach((opt,i)=> opt.name=`Fields[${index}].Options[${i}]`);
             });
         }
 
-        document.querySelector("form").addEventListener("submit", function () {
+        form.addEventListener("submit", function(e){
             reIndexFields();
+            let isValid=true;
+            document.querySelectorAll(".field-item").forEach(item=>{
+                const type=item.querySelector(".field-type").value;
+                const maxLengthInput=item.querySelector(".text-maxlength input");
+                const optionsInputs=item.querySelectorAll(".options-box input");
+                if(type==="Text"){
+                    if(!maxLengthInput||!maxLengthInput.value||maxLengthInput.value<=0){alert("Max Length required for Text field.");isValid=false;}
+                }
+                if(["Select","Radio","Checkbox"].includes(type)){
+                    if(!optionsInputs||Array.from(optionsInputs).every(opt=>!opt.value.trim())){alert("Options required for Select/Radio/Checkbox field.");isValid=false;}
+                }
+            });
+            if(!isValid) e.preventDefault();
         });
-
     </script>
 }

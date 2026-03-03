@@ -17,9 +17,9 @@ public class AuthController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> ForgotPassword(string emailUsername, string password, string confirmPassword)
+    public async Task<IActionResult> ForgotPassword(string email, string password, string confirmPassword)
     {
-        if (string.IsNullOrWhiteSpace(emailUsername) ||
+        if (string.IsNullOrWhiteSpace(email) ||
             string.IsNullOrWhiteSpace(password) ||
             string.IsNullOrWhiteSpace(confirmPassword))
         {
@@ -32,7 +32,7 @@ public class AuthController : Controller
             ViewBag.Error = "Passwords do not match";
             return View();
         }
-        var user = await _userRepository.GetUserByEmailOrUsernameAsync(emailUsername);
+        var user = await _userRepository.GetUserByEmailOrUsernameAsync(email);
         if  (user == null)
         {
             ViewBag.Error = "User not found";
@@ -54,10 +54,10 @@ public class AuthController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(string emailUsername, string password)
+    public async Task<IActionResult> Login(string email, string password)
     {
-        var user = await _userRepository.GetUserByEmailOrUsernameAsync(emailUsername);
-        if (string.IsNullOrWhiteSpace(emailUsername) ||
+        var user = await _userRepository.GetUserByEmailOrUsernameAsync(email);
+        if (string.IsNullOrWhiteSpace(email) ||
             string.IsNullOrWhiteSpace(password))
         {
             ViewBag.Error = "All fields are required";
@@ -86,9 +86,10 @@ public class AuthController : Controller
         }
         else
         {
-            HttpContext.Session.SetString("UserName", user.EmailUsername);
+            HttpContext.Session.SetString("Email", user.Email);
             HttpContext.Session.SetString("UserRole", user.Role);
-            HttpContext.Session.SetInt32("UserId", user.Id);
+            HttpContext.Session.SetString("UserId", user.Id.ToString());
+            HttpContext.Session.SetString("Name", user.Name);
         }
         return RedirectToAction("Index", "Dashboard");
     }

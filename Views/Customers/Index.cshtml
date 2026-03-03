@@ -19,11 +19,17 @@
     <br />
     <!-- Search & Filters -->
     <div class="row mb-3 g-2">
-        <div class="col-lg-3 col-md-4">
-            <input type="text" id="searchPlan"
-                   class="form-control w-100"
-                   placeholder="Search User..." />
-        </div>
+            <div class="col-lg-3 col-md-4">
+                <div class="input-group">
+                    <input type="text" id="searchPlan" class="form-control" placeholder="Search User..." />
+                    <span id="clearSearchBtn"
+                          style="position: absolute; right: 50px; top: 35%; transform: translateY(-30%);
+                             cursor: pointer; display: none; color: black; font-size: 1.1rem;">&times;</span>
+                    <button class="btn btn-outline-secondary" type="button" id="searchIconBtn">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </div>
 
         <div class="col-lg-3 col-md-4">
             <select id="genderFilter" class="form-select">
@@ -73,23 +79,76 @@
 <script>
     const searchPlan = document.getElementById("searchPlan");
     const genderFilter = document.getElementById("genderFilter");
-    const rows = document.querySelectorAll("table tbody tr");
+    const searchIconBtn = document.getElementById("searchIconBtn");
+    const clearSearchBtn = document.getElementById("clearSearchBtn");
 
     function filterUsers() {
-        const searchText = searchPlan.value.toLowerCase();
-        const genderValue = genderFilter.value.toLowerCase();
-
-        rows.forEach(row =>{
-            const genderText = row.children[5].innerText.toLowerCase();
-
-            const matchesSearch = row.innerText.toLowerCase().includes(searchText);
-            const matchesGender = !genderValue || genderText === genderValue;
-
-            row.style.display =
-                matchesSearch && matchesGender ? "" : "none";
+        const rows = document.querySelectorAll("table tbody tr");
+        const searchText = searchPlan.value.toLowerCase().trim();
+        const genderText = genderFilter.value.toLowerCase();
+        rows.forEach(row => {
+            const nameMatch = row.cells[0].innerText.toLowerCase().includes(searchText);
+            const genderMatch = genderText === "" || row.cells[1].innerText.toLowerCase() === genderText;
+            row.style.display = (nameMatch && genderMatch) ? "" : "none";
         });
     }
 
-    searchPlan.addEventListener("keyup", filterUsers);
-    GenderFilter.addEventListener("change", filterUsers);
+    // Show/hide clear button
+    searchPlan.addEventListener("input", function() {
+        clearSearchBtn.style.display = this.value.trim() !== "" ? "inline":"none";
+    });
+
+    // Clear input when clicking ×
+    clearSearchBtn.addEventListener("click", function() {
+        searchPlan.value = "";
+        clearSearchBtn.style.display = "none";
+        filterUsers();
+        searchPlan.focus();
+    });
+
+    // Search button click
+    searchIconBtn.addEventListener("click", filterUsers);
+
+    // Enter key triggers search
+    searchPlan.addEventListener("keydown", function(e){
+        if(e.key === "Enter") {
+            e.preventDefault();
+            filterUsers();
+        }
+    });
+
+    // Gender filter change triggers search
+    genderFilter.addEventListener("change", filterUsers);
+
+    // Toggle Active Status
+    function toggleActive(el) {
+        const userId = el.dataset.userid;
+        const isActive = el.checked;
+
+        fetch(`/AdminUser/ToogleActive/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({ isActive })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                alert('Failed to update status.');
+                el.checked = !isActive;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            el.checked = !isActive;
+        });
+    }
+
+    document.querySelectorAll(".toggle-active").forEach(switchEl => {
+        switchEl.addEventListener("change", function () {
+            toggleActive(this);
+        });
+    });
 </script>

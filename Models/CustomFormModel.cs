@@ -7,7 +7,7 @@ namespace ManvarFitness.Models
     {
         public int? CustomFormId { get; set; }
 
-        [Required]
+        
         [MaxLength(100)]
         public string? Name { get; set; }
         [Required]
@@ -56,6 +56,8 @@ namespace ManvarFitness.Models
         public string? Options { get; set; }
         public bool IsRequired { get; set; }
         public bool IsActive { get; set; }
+        public int ConcernId { get; set; }
+        public int SubConcernId { get; set; }
 
         // Validation/Limits
         public int? MinValue { get; set; }

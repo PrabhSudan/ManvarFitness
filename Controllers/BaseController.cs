@@ -6,8 +6,15 @@ namespace ManvarFitness.Controllers
     public class BaseController : Controller
     {
         protected string CurrentUserRole => HttpContext.Session.GetString("UserRole") ?? "";
-        protected string CurrentUserName => HttpContext.Session.GetString("UserName") ?? "User";
-        protected int CurrentUserId => HttpContext.Session.GetInt32("UserId") ?? 0;
+        protected string CurrentName => HttpContext.Session.GetString("Name") ?? "User";
+        protected Guid CurrentUserId
+        {
+            get
+            {
+                var value = HttpContext.Session.GetString("UserId");
+                return Guid.TryParse(value, out var id) ? id : Guid.Empty;
+            }
+        }
         // Ensure user is logged in
         protected IActionResult? RequireLogin()
         {
@@ -30,7 +37,7 @@ namespace ManvarFitness.Controllers
         {
             // Make role and username available in all views
             ViewBag.CurrentUserRole = CurrentUserRole;
-            ViewBag.CurrentUserName = CurrentUserName;
+            ViewBag.CurrentName = CurrentName;
             base.OnActionExecuting(context);
         }
     }

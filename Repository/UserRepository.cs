@@ -12,10 +12,10 @@ namespace ManvarFitness.Repository
         {
             _context = context;
         }
-        public async Task<AdminUser?> GetUserByEmailOrUsernameAsync(string emailUsername)
+        public async Task<AdminUser?> GetUserByEmailOrUsernameAsync(string Email)
         {
             return await _context.AdminUsers
-                .FirstOrDefaultAsync(u => u.EmailUsername == emailUsername);    
+                .FirstOrDefaultAsync(u => u.Email == Email);    
         }
 
         public async Task UpdatePasswordAsync(AdminUser user)

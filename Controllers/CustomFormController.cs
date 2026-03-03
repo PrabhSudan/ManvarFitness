@@ -22,6 +22,7 @@ namespace ManvarFitness.Controllers
 
             var fields = _context.CustomFields
                 .Include(f => f.CustomForm)
+                .ThenInclude(cf => cf.Concern)
                 .AsQueryable();
 
             if (concernId.HasValue)
@@ -55,37 +56,44 @@ namespace ManvarFitness.Controllers
         {
             if (!ModelState.IsValid)
             {
-                // Repopulate dropdowns if validation fails
-                ViewBag.ConcernsList = new SelectList(
-                    _context.Concerns.ToList(),
-                    "ConcernId",
-                    "Name",
-                    model.ConcernId
-                );
+                ViewBag.ConcernsList = new SelectList(_context.Concerns.ToList(), "ConcernId", "Name", model.ConcernId);
                 ViewBag.SubConcernsList = new SelectList(
                     _context.SubConcerns.Where(s => s.ConcernId == model.ConcernId).ToList(),
-                    "SubConcernId",
-                    "Name",
-                    model.SubConcernId
+                    "SubConcernId", "Name", model.SubConcernId
                 );
-
-                if (model.Fields != null && model.Fields.Any())
-                {
-                    var fields = model.Fields.Select(f => new CustomField
-                    {
-                        Label = f.Label,
-                        FieldType = f.FieldType,
-                        MinValue = f.MinValue,
-                        MaxValue = f.MaxValue,
-                        MaxLength = f.MaxLength,
-                        IsActive = f.IsActive,
-                        IsRequired = f.IsRequired
-                    }).ToList();
-
-                    _context.CustomFields.AddRange(fields);
-                    _context.SaveChanges();
-                }
+                return View(model);
             }
+
+            // Create CustomForm first
+            var form = new CustomForm
+            {
+                Name = model.Name,
+                ConcernId = model.ConcernId,
+                SubConcernId = model.SubConcernId,
+                IsActive = true
+            };
+
+            _context.CustomForms.Add(form);
+            _context.SaveChanges();
+
+            if (model.Fields != null && model.Fields.Any())
+            {
+                var fields = model.Fields.Select(f => new CustomField
+                {
+                    Label = f.Label,
+                    FieldType = f.FieldType,
+                    MinValue = f.MinValue,
+                    MaxValue = f.MaxValue,
+                    MaxLength = f.MaxLength,
+                    IsActive = f.IsActive,
+                    IsRequired = f.IsRequired,
+                    CustomFormId = form.CustomFormId
+                }).ToList();
+
+                _context.CustomFields.AddRange(fields);
+                _context.SaveChanges();
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -102,12 +110,21 @@ namespace ManvarFitness.Controllers
             return View(form);
         }
 
-        [HttpGet]
-        public IActionResult GetSubConcerns(int concernId)
+        public IActionResult GetSubConcerns(int? concernId)
         {
-            var subConcerns = _context.SubConcerns
-                .Where(s => s.ConcernId == concernId)
-                .Select(s => new { s.SubConcernId, s.Name })
+            var query = _context.SubConcerns.AsQueryable();
+
+            if (concernId.HasValue)
+            {
+                query = query.Where(s => s.ConcernId == concernId.Value);
+            }
+
+            var subConcerns = query
+                .Select(s => new
+                {
+                    subConcernId = s.SubConcernId,
+                    name = s.Name
+                })
                 .ToList();
 
             return Json(subConcerns);
@@ -146,12 +163,15 @@ namespace ManvarFitness.Controllers
         public IActionResult DeleteField(int id)
         {
             var field = _context.CustomFields.Find(id);
-            if (field == null) return NotFound();
+            if (field == null)
+            {
+                return Json(new { success = false });
+            }
 
             field.IsActive = false; // soft delete
             _context.SaveChanges();
 
-            return RedirectToAction(nameof(Index));
+            return Json(new { success = true });
         }
     }
 }
