@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ManvarFitness.Controllers
 {
-    public class SubConcernController : Controller
+    public class SubConcernController : BaseController
     {
         private readonly ApplicationDbContext _context;
 
-        public SubConcernController(ApplicationDbContext context)
+        public SubConcernController(ApplicationDbContext context): base(context)
         {
             _context = context;
         }
@@ -78,8 +78,7 @@ namespace ManvarFitness.Controllers
             sub.IsActive = !sub.IsActive;
             _context.SaveChanges();
 
-            TempData["Success"] = $"Sub Concern '{sub.Name}' has been {(sub.IsActive ? "activated" : "deactivated")}.";
-            return RedirectToAction("Index");
+            return Json(new { success = true, isActive = sub.IsActive });
         }
 
         // ===== Soft Delete =====

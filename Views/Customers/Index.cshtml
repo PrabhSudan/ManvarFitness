@@ -5,68 +5,115 @@
         background-color: #ccc; /* gray when OFF */
         border-radius: 1rem; /* keep default Bootstrap rounded */
         transition: background-color 0.4s;
+        align-items : center;
     }
 
         /* ON state */
         .form-check-input:checked {
             background-color: #FF7F11; /* orange when ON */
         }
+
+    
+    /* ------------------- TABLE STYLING ------------------- */
+    .customers-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+
+        .customers-table th {
+            text-align: center;
+            padding: 0.75rem;
+            color: black;
+            border: 1px solid black;
+            background-color: #f8f8f8; /* header white */
+        }
+
+        .customers-table td {
+            text-align: center;
+            padding: 0.6rem;
+            border: 1px solid #d1d5db;
+            vertical-align: middle;
+            background-color: white;
+        }
+
+        .customers-table tbody tr {
+            background-color: #f9fafb;
+        }
+
+    .search-btn {
+        background-color: white !important;
+        border: 1px solid #ced4da;
+        color: black;
+    }
+
+        .search-btn:focus,
+        .search-btn:active,
+        .search-input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        } 
 </style>
 
-<h1 class="fw-semibold mb-0" style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">Customers</h1>
+<div style="text-align: center;">
+    <h1 class="fw-semibold mb-0"style="display: inline-block;color: #333;padding-bottom: 4px;border-bottom: 3px solid #FF7F11;border-radius: 0.5px;">
+        Customers
+    </h1>
+</div>
 <div class="container-fluid px-4">
 
     <br />
-    <!-- Search & Filters -->
-    <div class="row mb-3 g-2">
-            <div class="col-lg-3 col-md-4">
-                <div class="input-group">
-                    <input type="text" id="searchPlan" class="form-control" placeholder="Search User..." />
-                    <span id="clearSearchBtn"
-                          style="position: absolute; right: 50px; top: 35%; transform: translateY(-30%);
-                             cursor: pointer; display: none; color: black; font-size: 1.1rem;">&times;</span>
-                    <button class="btn btn-outline-secondary" type="button" id="searchIconBtn">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </div>
+    <div class="container-fluid mb-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <!-- Search input + button -->
+            <div class="input-group" style="max-width: 200px; flex:1;">
+                <input type="text" id="searchPlan" class="form-control search-input" placeholder="Search User..." />
+                <button class="btn search-btn" type="button" id="searchIconBtn">
+                    <i class="bi bi-search" style="color:black"></i>
+                </button>
+                <span id="clearSearchBtn"
+                      style="position: absolute; right: 50px; top: 50%; transform: translateY(-50%);
+                         cursor: pointer; display: none; color: black; font-size: 1.1rem;">&times;</span>
             </div>
 
-        <div class="col-lg-3 col-md-4">
-            <select id="genderFilter" class="form-select">
-                <option value="">Filter by Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-            </select>
+            <!-- Filter on right -->
+            <div style="max-width: 200px; flex-shrink:0;">
+                <select id="genderFilter" class="form-select">
+                    <option value="">Filter by Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+            </div>
         </div>
     </div>
 
     <!-- TABLE -->
     <div class="table-responsive">
-        <table class="table table-striped table-bordered align-middle">
-            <thead class="table-light">
+        <table class="customers-table">
+            <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Gender</th>
-                    <th>Mobile</th>
-                    <th>Status</th>
+                    <th class="width:40%;">Name</th>
+                    <th class="width:25%;">Gender</th>
+                    <th class="width:25%;">Mobile</th>
+                    <th class="width:10%;">Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in Model)
                 {
                     <tr>
-                        <td>@(string.IsNullOrEmpty(user.Name) ? "Not Updated" : user.Name)</td>
-                        <td>@(string.IsNullOrEmpty(user.Gender) ? "Not Updated" : user.Gender)</td>
-                        <td>@user.Mobile</td>
-                        <td>
-                            <div class="form-check form-switch m-0">
-                                <input class="form-check-input"
+                        <td class="width:40%;">@(string.IsNullOrEmpty(user.Name) ? "Not Updated" : user.Name)</td>
+                        <td class="width:25%;">@(string.IsNullOrEmpty(user.Gender) ? "Not Updated" : user.Gender)</td>
+                        <td class="width:25%;">@user.Mobile</td>
+                        <td class="text-center">
+                            <div class="form-check form-switch d-inline-block m-0">
+                                <input class="form-check-input toggle-active"
                                        type="checkbox"
                                        role="switch"
-                                       data-roleid="@user.UserId"
-                                       id="switchRole@role.Id"
+                                       data-userid="@user.UserId"
+                                       id="switchUser@user.UserId"
                                        @(user.IsActive ? "checked" : "") />
-                                <label class="form-check-label" for="switchRole@role.Id"></label>
+                                <label class="form-check-label" for="switchUser@user.UserId"></label>
                             </div>
                         </td>
                     </tr>
@@ -77,78 +124,91 @@
 </div>
 
 <script>
-    const searchPlan = document.getElementById("searchPlan");
-    const genderFilter = document.getElementById("genderFilter");
-    const searchIconBtn = document.getElementById("searchIconBtn");
-    const clearSearchBtn = document.getElementById("clearSearchBtn");
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchPlan = document.getElementById("searchPlan");
+        const genderFilter = document.getElementById("genderFilter");
+        const searchIconBtn = document.getElementById("searchIconBtn");
+        const clearSearchBtn = document.getElementById("clearSearchBtn");
 
-    function filterUsers() {
-        const rows = document.querySelectorAll("table tbody tr");
-        const searchText = searchPlan.value.toLowerCase().trim();
-        const genderText = genderFilter.value.toLowerCase();
-        rows.forEach(row => {
-            const nameMatch = row.cells[0].innerText.toLowerCase().includes(searchText);
-            const genderMatch = genderText === "" || row.cells[1].innerText.toLowerCase() === genderText;
-            row.style.display = (nameMatch && genderMatch) ? "" : "none";
-        });
-    }
+        // -------------------- FILTER USERS --------------------
+        function filterUsers() {
+            const rows = document.querySelectorAll("table tbody tr");
+            const searchText = searchPlan.value.toLowerCase().trim();
+            const genderText = genderFilter.value.toLowerCase();
 
-    // Show/hide clear button
-    searchPlan.addEventListener("input", function() {
-        clearSearchBtn.style.display = this.value.trim() !== "" ? "inline":"none";
-    });
-
-    // Clear input when clicking ×
-    clearSearchBtn.addEventListener("click", function() {
-        searchPlan.value = "";
-        clearSearchBtn.style.display = "none";
-        filterUsers();
-        searchPlan.focus();
-    });
-
-    // Search button click
-    searchIconBtn.addEventListener("click", filterUsers);
-
-    // Enter key triggers search
-    searchPlan.addEventListener("keydown", function(e){
-        if(e.key === "Enter") {
-            e.preventDefault();
-            filterUsers();
+            rows.forEach(row => {
+                const nameMatch = row.cells[0].innerText.toLowerCase().includes(searchText);
+                const genderMatch = genderText === "" || row.cells[1].innerText.toLowerCase() === genderText;
+                row.style.display = (nameMatch && genderMatch) ? "" : "none";
+            });
         }
-    });
 
-    // Gender filter change triggers search
-    genderFilter.addEventListener("change", filterUsers);
+        // Show/hide clear button
+        searchPlan.addEventListener("input", function() {
+            clearSearchBtn.style.display = this.value.trim() !== "" ? "inline" : "none";
+        });
 
-    // Toggle Active Status
-    function toggleActive(el) {
-        const userId = el.dataset.userid;
-        const isActive = el.checked;
+        // Clear input when clicking ×
+        clearSearchBtn.addEventListener("click", function() {
+            searchPlan.value = "";
+            clearSearchBtn.style.display = "none";
+            filterUsers();
+            searchPlan.focus();
+        });
 
-        fetch(`/AdminUser/ToogleActive/${userId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-            },
-            body: JSON.stringify({ isActive })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) {
-                alert('Failed to update status.');
-                el.checked = !isActive;
+        // Search button click
+        searchIconBtn.addEventListener("click", filterUsers);
+
+        // Enter key triggers search
+        searchPlan.addEventListener("keydown", function(e) {
+            if(e.key === "Enter") {
+                e.preventDefault();
+                filterUsers();
             }
-        })
-        .catch(err => {
-            console.error(err);
-            el.checked = !isActive;
         });
-    }
 
-    document.querySelectorAll(".toggle-active").forEach(switchEl => {
-        switchEl.addEventListener("change", function () {
-            toggleActive(this);
+        // Gender filter change triggers search
+        genderFilter.addEventListener("change", filterUsers);
+
+        // -------------------- TOGGLE ACTIVE --------------------
+        function toggleActive(switchEl) {
+            const userId = switchEl.dataset.userid;
+            const isActive = switchEl.checked;
+
+            fetch(`/Customers/ToggleActive/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(!data.success) {
+                    alert('Failed to update status.');
+                    switchEl.checked = !isActive; // revert
+                } else {
+                    // Optional: row highlight when active
+                    const row = switchEl.closest('tr');
+                    if(isActive){
+                        row.style.backgroundColor = "#fff3e8"; // light orange
+                    } else {
+                        row.style.backgroundColor = ""; // default
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                switchEl.checked = !isActive; // revert
+            });
+        }
+
+        // Attach toggle event to all current switches
+        document.querySelectorAll(".toggle-active").forEach(switchEl => {
+            switchEl.addEventListener("change", function() {
+                toggleActive(this);
+            });
         });
+
     });
 </script>

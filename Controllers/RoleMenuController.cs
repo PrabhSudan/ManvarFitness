@@ -1,40 +1,23 @@
 ﻿using ManvarFitness.Database;
 using ManvarFitness.Entity;
 using ManvarFitness.Models;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Rendering;
 namespace ManvarFitness.Controllers
 {
     public class RoleMenuController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public RoleMenuController(ApplicationDbContext context)
+        public RoleMenuController(ApplicationDbContext context) : base(context)
         {
             _context = context;
         }
-        // Secure entire controller (Admin only)
-        public override void OnActionExecuting(ActionExecutingContext context)
-        {
 
-            var loginCheck = RequireLogin();
-            if (loginCheck != null)
-            {
-                context.Result = loginCheck;
-                return;
-            }
-            var roleCheck = AuthorizeRole("Admin");
-            if (roleCheck != null)
-            {
-                context.Result = roleCheck;
-                return;
-            }
-            base.OnActionExecuting(context);
-        }
         public IActionResult Index()
         {
-            var roles = _context.Roles.Select(r => r.Name).ToList();
+            var roles = _context.Roles
+                .Where(r => r.IsActive && !r.IsDeleted) 
+                .Select(r => r.Name)
+                .ToList();
             ViewBag.Roles = roles;
             return View();
         }
@@ -55,19 +38,12 @@ namespace ManvarFitness.Controllers
                 }).ToList()
             }).ToList();
 
-            List<int> assignedIds;
-
-            if (roleName == "Admin")
-            {
-                assignedIds = _context.Pages.Select(p => p.Id).ToList();
-            }
-            else
-            {
-                assignedIds = _context.RolePages
+            List<int> assignedIds = roleName.Equals("Admin", StringComparison.OrdinalIgnoreCase)
+                ? _context.Pages.Select(p => p.Id).ToList()
+                : _context.RolePages
                     .Where(rp => rp.RoleName == roleName && rp.IsActive)
                     .Select(rp => rp.PageId)
                     .ToList();
-            }
 
             ViewBag.AssignedIds = assignedIds;
             ViewBag.SelectedRole = roleName;
@@ -110,7 +86,6 @@ namespace ManvarFitness.Controllers
 
             return RedirectToAction("Index", new { roleName = roleName });
         }
-
     }
 }
 

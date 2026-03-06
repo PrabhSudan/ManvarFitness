@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ManvarFitness.Controllers
 {
-    public class CustomFormController : Controller
+    public class CustomFormController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public CustomFormController(ApplicationDbContext context)
+        public CustomFormController(ApplicationDbContext context): base(context)
         {
             _context = context;
         }

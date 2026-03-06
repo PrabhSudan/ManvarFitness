@@ -1,4 +1,5 @@
 ﻿using ManvarFitness.Database;
+using ManvarFitness.Entity;
 using ManvarFitness.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -8,28 +9,11 @@ namespace ManvarFitness.Controllers
     public class UserRolesController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public UserRolesController(ApplicationDbContext context)
+        public UserRolesController(ApplicationDbContext context): base(context)
         {
             _context = context;
         }
-        // Secure entire controller (Admin only)
-        public override void OnActionExecuting(ActionExecutingContext context)
-        {
 
-            var loginCheck = RequireLogin();
-            if (loginCheck != null)
-            {
-                context.Result = loginCheck;
-                return;
-            }
-            var roleCheck = AuthorizeRole("Admin");
-            if (roleCheck != null)
-            {
-                context.Result = roleCheck;
-                return;
-            }
-            base.OnActionExecuting(context);
-        }
         public IActionResult Index()
         {
             var roles = _context.Roles
@@ -51,7 +35,7 @@ namespace ManvarFitness.Controllers
             if (string.IsNullOrWhiteSpace(model.Name))
             {
                 ModelState.AddModelError("Name", "Role name is required.");
-                return View();
+                return View(model);
             }
 
             if (_context.Roles.Any(r => r.Name == model.Name))
@@ -65,6 +49,9 @@ namespace ManvarFitness.Controllers
             };
             _context.Roles.Add(roleEntity);
             _context.SaveChanges();
+
+            AssignDefaultPages(model.Name);
+
             TempData["Success"] = $"Role '{model.Name}' created successfully!";
             return RedirectToAction("Index");
         }
@@ -96,6 +83,50 @@ namespace ManvarFitness.Controllers
             
             _context.SaveChanges();
             return Json(new { success = true });
+        }
+
+        private void AssignDefaultPages(string roleName)
+        {
+            if (string.IsNullOrEmpty(roleName) || roleName.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            var defaultPageNames = new List<string> 
+            {
+                "Dashboard", "Users", "Customers", "Results", "Result Overview", "Diet Plans", "Diet Plan", "Workouts", "Workout Videos", "Meditation Music", "Yoga & Exercises", "Herbs", "Herb Overview", "Herb Category", "Concerns", "Main Concerns", "SubConcerns", "Custom Forms" 
+            };
+
+            // Get main pages first
+            var mainPages = _context.Pages
+                .Where(p => p.IsActive && defaultPageNames.Contains(p.Name) && p.ParentId == null)
+                .ToList();
+
+            var allPageIds = new List<int>();
+
+            foreach (var page in mainPages)
+            {
+                allPageIds.Add(page.Id);
+
+                // Add sub-pages automatically
+                var subPageIds = _context.Pages
+                    .Where(sp => sp.IsActive && sp.ParentId == page.Id)
+                    .Select(sp => sp.Id)
+                    .ToList();
+
+                allPageIds.AddRange(subPageIds);
+            }
+
+            // Assign all pages to the role
+            foreach (var id in allPageIds.Distinct()) // avoid duplicates
+            {
+                _context.RolePages.Add(new RolePage
+                {
+                    RoleName = roleName,
+                    PageId = id,
+                    IsActive = true
+                });
+            }
+
+            _context.SaveChanges();
         }
     }
 }

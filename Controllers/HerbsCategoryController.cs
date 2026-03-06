@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ManvarFitness.Controllers
 {
-    public class HerbsCategoryController : Controller
+    public class HerbsCategoryController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public HerbsCategoryController(ApplicationDbContext context)
+        public HerbsCategoryController(ApplicationDbContext context): base(context)
         {
             _context = context;
         }

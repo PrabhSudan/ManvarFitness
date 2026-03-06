@@ -3,9 +3,9 @@
     public class BaseEntity
     {
          public DateTime CreatedOn { get; set; }
-        public Guid? CreatedBy { get; set; }      // <-- change to Guid?
+        public int? CreatedBy { get; set; }     
         public DateTime? UpdatedOn { get; set; }
-        public Guid? UpdatedBy { get; set; }      // <-- change to Guid?
+        public int? UpdatedBy { get; set; }      
         public bool IsDeleted { get; set; }
     }
 }

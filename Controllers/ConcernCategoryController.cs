@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace ManvarFitness.Controllers
 {
-    public class ConcernCategoryController : Controller
+    public class ConcernCategoryController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public ConcernCategoryController(ApplicationDbContext context)
+        public ConcernCategoryController(ApplicationDbContext context): base(context)
         {
             _context = context;
         }

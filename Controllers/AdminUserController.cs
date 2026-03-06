@@ -11,28 +11,11 @@ namespace ManvarFitness.Controllers
     public class AdminUserController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public AdminUserController(ApplicationDbContext context)
+        public AdminUserController(ApplicationDbContext context): base(context)
         {
             _context = context;
         }
 
-        //  Automatically secure all actions
-        public override void OnActionExecuting(ActionExecutingContext context)
-        {
-            var loginCheck = RequireLogin();
-            if (loginCheck != null)
-            {
-                context.Result = loginCheck;
-                return;
-            }
-            var roleCheck = AuthorizeRole("Admin");
-            if (roleCheck != null)
-            {
-                context.Result = roleCheck;
-                return;
-            }
-            base.OnActionExecuting(context);
-        }
         // GET: AdminUserController
         public async Task<IActionResult> Index()
         {
@@ -126,7 +109,7 @@ namespace ManvarFitness.Controllers
             user.Mobile = model.Mobile;
             // On edit 
             user.UpdatedOn = DateTime.UtcNow;
-            user.UpdatedBy = CurrentUserId;
+            user.UpdatedBy = null;   
 
             _context.AdminUsers.Update(user);
             await _context.SaveChangesAsync();
@@ -152,7 +135,7 @@ namespace ManvarFitness.Controllers
             // Soft delete
             user.IsDeleted = true;
             user.UpdatedOn = DateTime.UtcNow;
-            user.UpdatedBy = CurrentUserId;
+            user.UpdatedBy = null;   
 
             await _context.SaveChangesAsync();
 
@@ -160,14 +143,14 @@ namespace ManvarFitness.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ToogleActive(Guid id)
+        public async Task<IActionResult> ToggleActive(Guid id)
         {
             var user = await _context.AdminUsers.FindAsync(id);
             if (user == null) return NotFound();
 
             user.IsActive = !user.IsActive;
             user.UpdatedOn = DateTime.UtcNow;
-            user.UpdatedBy = CurrentUserId;
+            user.UpdatedBy = null;   
 
             await _context.SaveChangesAsync();
 
@@ -184,7 +167,7 @@ namespace ManvarFitness.Controllers
 
             user.Role = model.Role;
             user.UpdatedOn = DateTime.UtcNow;
-            user.UpdatedBy = CurrentUserId;
+            user.UpdatedBy = null;   
 
             _context.SaveChanges();
 

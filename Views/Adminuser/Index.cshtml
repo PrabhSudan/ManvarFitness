@@ -5,15 +5,55 @@
         background-color: #ccc; /* gray when OFF */
         border-radius: 1rem; /* keep default Bootstrap rounded */
         transition: background-color 0.4s;
+        align-items: center;
     }
 
         /* ON state */
         .form-check-input:checked {
             background-color: #FF7F11; /* orange when ON */
         }
+
+    .customers-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+
+        .customers-table th {
+            text-align: center;
+            padding: 0.75rem;
+            color: black;
+            border: 1px solid black;
+            background-color: #f8f8f8; /* header white */
+        }
+
+        .customers-table td {
+            text-align: center;
+            padding: 0.6rem;
+            border: 1px solid #d1d5db;
+            vertical-align: middle;
+            background-color: white;
+        }
+
+        .customers-table tbody tr {
+            background-color: #f9fafb;
+        }
+
+    .center-cell {
+        display: flex;
+        justify-content: center; /* horizontal */
+        align-items: center; /* vertical */
+        gap: 4px; /* spacing between buttons/text */
+    }
+
 </style>
 
-<h1 class="fw-semibold mb-3" style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">Admin Users</h1>
+<div style="text-align: center;">
+    <h1 class="fw-semibold mb-0" style="display: inline-block;color: #333;padding-bottom: 4px;border-bottom: 3px solid #FF7F11;border-radius: 0.5px;">
+        Admin Users
+    </h1>
+</div>
+
 <div class="container-fluid px-4">
     <div id="addUserContainer"  class="d-flex justify-content-between align-items-center mt-4 mb-3 d-none">
         <a asp-controller="AdminUser"
@@ -40,16 +80,16 @@
     </div>
     <!-- TABLE -->
     <div class="table-responsive">
-        <table class="table table-striped table-bordered align-middle">
-            <thead class="table-light">
+    <table class="customers-table">
+            <thead>
                 <tr>
-                <th style="width:10%">Name</th>
-                    <th style="width:20%">Email</th>
+                    <th class="width:10%">Name</th>
+                    <th class="width:20%">Email</th>
                     <th class="d-none d-md-table-cell" style="width:10%">Password</th>
-                    <th style="width:10%">Role</th>
-                    <th style="width:15%">Mobile</th>
-                    <th style="width:10%">Status</th>
-                    <th style="width:15%">Actions</th>
+                    <th class="width:10%">Role</th>
+                    <th class="width:15%">Mobile</th>
+                    <th class="width:10%">Status</th>
+                    <th class="width:15%">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -64,7 +104,7 @@
                             </span>
                         </td>
                         <td>
-                            <div class="d-flex align-items-center gap-2">
+                            <div class="center-cell">
 
                                 <!-- Role Text -->
                                 <span class="role-text" id="role-text-@user.Id">
@@ -100,8 +140,8 @@
                         </td>
 
                         <td>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" data-userid="@user.Id"
+                            <div class="form-check form-switch d-inline-block m-0">
+                                <input class="form-check-input  toggle-active" type="checkbox" role="switch" data-userid="@user.Id"
                                        @(user.IsActive ? "checked" : "") >
                                 <label class="form-check-label" for="switchCheckDefault"></label>
                             </div>
@@ -109,7 +149,7 @@
 
                         </td>
                         <td>
-                            <div class="d-flex gap-2">
+                            <div class="center-cell">
                                 <!-- Details -->
                                 <a asp-action="Details"
                                    asp-route-id="@user.Id"

@@ -1,6 +1,4 @@
 ﻿@using System.Text.RegularExpressions
-@using ManvarFitness.Database
-@inject ApplicationDbContext _context
 
 @{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
@@ -8,24 +6,19 @@
     var role = Context.Session.GetString("UserRole");
     var Name = Context.Session.GetString("Name") ?? "User";
     // for pages
-    var allowedPageUrls = _context.RolePages
-        .Where(rp => rp.RoleName == role && rp.IsActive)
-        .Join(_context.Pages,
-              rp => rp.PageId,
-              p => p.Id,
-              (rp, p) => p.Url)
-        .ToList();
+    var allowedPageUrls = ViewBag.AllowedPageUrls as List<string> ?? new List<string>();
 
     bool HasAccess(string controller, string action = null)
     {
-        if(action != null)
+        if (string.IsNullOrEmpty(controller))
+            return false;
+
+        if (action != null)
         {
             return allowedPageUrls.Contains($"/{controller}/{action}");
         }
-        else
-        {
-            return allowedPageUrls.Any(Url => Url.StartsWith($"/{controller}")|| Url == $"/{controller}");
-        }
+
+        return allowedPageUrls.Any(url => url.StartsWith($"/{controller}"));
     }
 }
 <!DOCTYPE html>
@@ -46,7 +39,7 @@
         <div class="topbar-left">
             <button class="menu-btn" id="menuToggle"> ☰ </button> 
             <img src="~/img/IMG_5797.JPG (1).jpeg" alt="Logo" class="logo" />
-            <span><b>Mawvar Fitness</b></span>
+            <span><b>Manwar Fitness</b></span>
         </div>
 
         <div class="dropdown text-end position-relative">
@@ -87,7 +80,7 @@
 
                 @if (HasAccess("Customers") || HasAccess("AdminUser") || HasAccess("UserRoles") || HasAccess("RoleMenu"))
                 {
-                    <li class="dropdown-li@(currentController == "Customers" ? "active" : "")">
+                    <li class="dropdown-li @(currentController == "Customers" || currentController == "AdminUser" || currentController == "UserRoles" || currentController == "RoleMenu" ? "activeparent" : "" )">
                         <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usersSubmenu">
                             Users
                         </a>
@@ -128,7 +121,7 @@
 
                 @if (HasAccess("Result"))
                 {
-                    <li class="dropdown-li@(currentController == "Result" ? "activeparent" : "")">
+                    <li class="dropdown-li @(currentController == "Result" ? "activeparent" : "")">
                         <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#resultsSubmenu">
                             Result
                         </a>
@@ -149,7 +142,7 @@
                
                 @if (HasAccess("ConcernCategory") || HasAccess("SubConcern") || HasAccess("CustomForm"))
                 {
-                    <li class="dropdown-li@(currentController == "ConcernCategory" || currentController == "SubConcern" || currentController == "CustomForm" ? "activeparent" : "")">
+                    <li class="dropdown-li @(currentController == "ConcernCategory" || currentController == "SubConcern" || currentController == "CustomForm" ? "activeparent" : "")">
                         <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#concernsSubmenu">
                             Concerns
                         </a>
@@ -245,7 +238,7 @@
 
                 @if (HasAccess("Herbs") || HasAccess("HerbsCategory"))
                 {
-                    <li class="dropdown-li@(currentController == "Herbs" || currentController == "HerbsCategory" ? "activeparent" : "")">
+                    <li class="dropdown-li @(currentController == "Herbs" || currentController == "HerbsCategory" ? "activeparent" : "")">
                         <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#herbsSubmenu">
                             Herbs
                         </a>
@@ -271,7 +264,7 @@
 
                 @if (HasAccess("Revenue") || HasAccess("Payments"))
                 {
-                    <li class="dropdown-li@(currentController == "Revenue" || currentController == "Payments" ? "activeparent" : "")">
+                    <li class="dropdown-li @(currentController == "Revenue" || currentController == "Payments" ? "activeparent" : "")">
                         <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#revenueSubmenu">
                             Revenue
                         </a>
@@ -318,8 +311,9 @@
 
         function resetTimer() {
             clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(function() {
+            inactivityTimer = setTimeout(function () {
                 alert("Session expired due to inactivity.");
+                window.location.href = "/Auth/Login";
             }, timeoutMilliseconds);
         }
 

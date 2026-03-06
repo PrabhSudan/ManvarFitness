@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ManvarFitness.Controllers
 {
-    public class CustomersController : Controller
+    public class CustomersController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public CustomersController(ApplicationDbContext context)
+        public CustomersController(ApplicationDbContext context): base(context)
         {
             _context = context;
         }
@@ -20,17 +20,16 @@ namespace ManvarFitness.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Toggle(int id)
+        public IActionResult ToggleActive(int id)
         {
-            var users = _context.Users.Find(id);
-            if (users == null)
-            {
-                return NotFound();
-            }
-            users.IsActive = !users.IsActive;
+            var user = _context.Users.Find(id);
+            if (user == null)
+                return Json(new { success = false });
+
+            user.IsActive = !user.IsActive;
             _context.SaveChanges();
-            TempData["Success"] = $"Role '{users.Name}' {(users.IsActive ? "deactivated" : "activated")} successfully!";
-            return RedirectToAction("Index");
+
+            return Json(new { success = true, isActive = user.IsActive });
         }
     }
 }

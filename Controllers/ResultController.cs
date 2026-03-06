@@ -10,10 +10,10 @@ using System.Text.Json;
 
 namespace ManvarFitness.Controllers
 {
-    public class ResultController : Controller
+    public class ResultController : BaseController
     {
         private readonly ApplicationDbContext _context;
-        public ResultController(ApplicationDbContext context)
+        public ResultController(ApplicationDbContext context): base(context)
         {
             _context = context;
         }

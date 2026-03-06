@@ -5,26 +5,66 @@
         background-color: #ccc; /* gray when OFF */
         border-radius: 1rem; /* keep default Bootstrap rounded */
         transition: background-color 0.4s;
+        align-items: center;
     }
 
         /* ON state */
         .form-check-input:checked {
             background-color: #FF7F11; /* orange when ON */
         }
+
+    .customers-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+
+        .customers-table th {
+            text-align: center;
+            padding: 0.75rem;
+            color: black;
+            border: 1px solid black;
+            background-color: #f8f8f8; /* header white */
+        }
+
+        .customers-table td {
+            text-align: center;
+            padding: 0.6rem;
+            border: 1px solid #d1d5db;
+            vertical-align: middle;
+            background-color: white;
+        }
+
+        .customers-table tbody tr {
+            background-color: #f9fafb;
+        }
+
+    .center-cell {
+        display: flex;
+        justify-content: center; /* horizontal */
+        align-items: center; /* vertical */
+        gap: 4px; /* spacing between buttons/text */
+    }
 </style>
-<h2 class="fw-semibold mb-0"
-    style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">
-    Manage User Roles
-</h2>
-<br />
+<div style="text-align: center;">
+    <h1 class="fw-semibold mb-0" style="display: inline-block;color: #333;padding-bottom: 6px;border-bottom: 3px solid #FF7F11;border-radius: 0.5px;">
+        Manage User Roles
+    </h1>
+</div>
 <br />
 
-<a class="btn btn-primary mb-3" asp-controller="UserRoles" asp-action="Create">Add Role</a>
 @Html.AntiForgeryToken()
-<table class="table table-bordered">
+
+<div>
+    <a class="btn btn-success" asp-controller="UserRoles" asp-action="Create">
+        Add New Role
+    </a>
+</div>
+
+<table class="customers-table">
     <thead>
         <tr>
-            <th style="width:80%">Role</th>
+            <th style="width:80%; text-align:left;">Role</th>
             <th>Status</th>
             <th>Action</th>
         </tr>
@@ -33,10 +73,10 @@
         @foreach (var role in Model)
         {
             <tr>
-                <td>@role.Name</td>
+                <td style="width:80%; text-align:left;">@role.Name</td>
                 <td>
-                    <div class="form-check form-switch m-0">
-                        <input class="form-check-input"
+                    <div class="form-check form-switch d-inline-block m-0">
+                        <input class="form-check-input toggle-active"
                                type="checkbox"
                                role="switch"
                                data-roleid="@role.Id"
@@ -46,7 +86,7 @@
                     </div>
                 </td>
                 <td>
-                    <div class="action-buttons">
+                    <div class="center-cell">
 
                         <button type="button"
                                 class="btn btn-sm"
@@ -62,6 +102,9 @@
         }
     </tbody>
 </table>
+<br />
+<br />
+
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">

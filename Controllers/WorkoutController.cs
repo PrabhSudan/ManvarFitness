@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace ManvarFitness.Controllers
 {
 
-    public class WorkoutController : Controller
+    public class WorkoutController : BaseController
     {
         private readonly ApplicationDbContext _context;
         private readonly string uploadfolder;
 
-        public WorkoutController(ApplicationDbContext context)
+        public WorkoutController(ApplicationDbContext context): base(context)
         {
             _context = context;
             uploadfolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");

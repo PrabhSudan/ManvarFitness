@@ -1,16 +1,18 @@
+using ManvarFitness.Database;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ManvarFitness.Controllers;
 
 public class DashboardController : BaseController
 {
-  public IActionResult Index()
+    private readonly ApplicationDbContext _context;
+    public DashboardController(ApplicationDbContext context) : base(context)
     {
-        var loginCheck = RequireLogin();
-        if (loginCheck != null) return loginCheck;
+        _context = context;
+    }
 
-        var roleCheck = AuthorizeRole("Admin", "Coach");
-        if (roleCheck != null) return roleCheck;
+    public IActionResult Index()
+    {
         return View();
     }
 }

@@ -6,14 +6,14 @@ using System.Text.Json;
 
 namespace ManvarFitness.Controllers
 {
-    public class DietPlanController : Controller
+    public class DietPlanController : BaseController
     {
         private readonly ApplicationDbContext _context;
         private readonly List<string> dayOrder = new()
         {
             "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"
         };
-        public DietPlanController(ApplicationDbContext context)
+        public DietPlanController(ApplicationDbContext context): base(context)
         {
             _context = context;
         }

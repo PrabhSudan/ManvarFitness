@@ -5,7 +5,7 @@ namespace ManvarFitness.Models
     public class AdminUserModel
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         [Required(ErrorMessage = "Email is required.")]
         public string? Email{ get; set; }
