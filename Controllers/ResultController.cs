@@ -21,6 +21,7 @@ namespace ManvarFitness.Controllers
         public IActionResult Index()
         {
             var results = _context.Results
+                .Where(s => !s.IsDeleted)
                 .Include(s => s.User)
                 .Include(s => s.ConcernCategory)
                 .Include(s => s.SubConcern)
@@ -164,26 +165,23 @@ namespace ManvarFitness.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Toggle(int id)
         {
-            var result = _context.Results.Find(id);
+            var result = _context.Results.FirstOrDefault(x => x.ResultId == id);
             if (result == null)
             {
-                return NotFound();
+                return Json(new { success = false });
             }
 
             result.IsActive = !result.IsActive;
             _context.SaveChanges();
 
-            TempData["Success"] =
-                $"Result {(result.IsActive ? "activated" : "deactivated")} successfully!";
-
-            return RedirectToAction("Index");
+            return Json(new { success = true, isActive = result.IsActive });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult SoftDelete(int id)
         {
-            var role = _context.Roles.Find(id);
+            var role = _context.Results.FirstOrDefault(x => x.ResultId == id);
             if (role == null)
             {
                 return Json(new { success = false });

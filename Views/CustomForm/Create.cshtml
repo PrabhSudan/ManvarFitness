@@ -193,13 +193,15 @@
                         <input name="Fields[0].Label" class="form-control me-2" placeholder="Field Name" required />
                         <select name="Fields[0].FieldType" class="form-control field-type me-2">
                             <option value="">Select FieldType</option>
-                            <option value="Text">Text</option>
+                            <option value="Text">Textbox</option>
+                            <option value="Textarea">Textarea</option>
+                            <option value="Date">Date</option>
                             <option value="Number">Number</option>
-                            <option value="Select">Select</option>
+                            <option value="Select">Dropdown</option>
+                            <option value="File">File</option>
+                            <option value="Time">Time</option>
                             <option value="Radio">Radio</option>
                             <option value="Checkbox">Checkbox</option>
-                            <option value="Date">Date</option>
-                            <option value="File">File</option>
                         </select>
                         <div class="number-range d-none d-flex gap-2">
                             <input name="Fields[0].MinValue" class="form-control" placeholder="Min" />
@@ -212,6 +214,32 @@
                             <input name="Fields[0].Options" class="form-control" placeholder="Enter options" />
                             <button type="button" class="btn btn-success btn-sm add-option">+</button>
                         </div>
+
+                        <div class="file-settings d-none d-flex gap-2">
+                            <input name="Fields[0].MaxFileSize"
+                                   type="number"
+                                   class="form-control"
+                                   placeholder="Max MB">
+                        </div>
+
+                        <div class="date-settings d-none d-flex gap-2">
+
+                            <input name="Fields[0].MinDate"
+                                   type="date"
+                                   class="form-control"
+                                   placeholder="Date">
+
+                        </div>
+
+                        <div class="time-range d-none d-flex gap-2">
+                            <input name="Fields[0].StartTime"
+                                   type="time"
+                                   class="form-control">
+
+                            <input name="Fields[0].EndTime"
+                                   type="time"
+                                   class="form-control">
+                        </div>
                     </div>
                 </div>
 
@@ -223,171 +251,319 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
     <script>
-        // -------- Custom Selects --------
-        function setupCustomSelect(wrapperId, hiddenSelectId){
-            const wrapper=document.getElementById(wrapperId);
-            const selected=wrapper.querySelector('.custom-select-selected');
-            const optionsContainer=wrapper.querySelector('.custom-select-options');
-            const hiddenSelect=document.getElementById(hiddenSelectId);
 
-            selected.addEventListener('click', e=>{
-                e.stopPropagation();
-                document.querySelectorAll('.custom-select-options').forEach(el=>{
-                    if(el!==optionsContainer) el.style.display='none';
-                });
-                optionsContainer.style.display = optionsContainer.style.display==='block'?'none':'block';
+        // Custom Select Dropdown
+
+                function setupCustomSelect(wrapperId, hiddenSelectId) {
+            const wrapper = document.getElementById(wrapperId);
+            const selected = wrapper.querySelector('.custom-select-selected');
+            const optionsContainer = wrapper.querySelector('.custom-select-options');
+            const hiddenSelect = document.getElementById(hiddenSelectId);
+
+            // Toggle dropdown on click
+            selected.addEventListener('click', () => {
+                optionsContainer.style.display = optionsContainer.style.display === 'block' ? 'none' : 'block';
             });
 
-            optionsContainer.addEventListener('click', e=>{
-                if(e.target.dataset.value){
-                    selected.textContent=e.target.textContent;
-                    hiddenSelect.value=e.target.dataset.value;
+            // Handle option clicks
+            optionsContainer.querySelectorAll('div').forEach(option => {
+                option.addEventListener('click', () => {
+                    const value = option.dataset.value;
+                    const text = option.textContent;
+
+                    // Update hidden select
+                    hiddenSelect.value = value;
+
+                    // Update visible text
+                    selected.textContent = text;
+
+                    // Close dropdown
+                    optionsContainer.style.display = 'none';
+
+                    // Trigger change event if needed (for Sub-Concern load)
                     hiddenSelect.dispatchEvent(new Event('change'));
-                    optionsContainer.style.display='none';
+                });
+            });
+
+            // Close dropdown if clicked outside
+            document.addEventListener('click', (e) => {
+                if (!wrapper.contains(e.target)) {
+                    optionsContainer.style.display = 'none';
                 }
             });
-
-            document.addEventListener('click', ()=> optionsContainer.style.display='none');
         }
 
-        setupCustomSelect('ConcernWrapper','ConcernId');
-        setupCustomSelect('SubConcernWrapper','SubConcernId');
+        setupCustomSelect("ConcernWrapper", "ConcernId");
+        setupCustomSelect("SubConcernWrapper", "SubConcernId");
 
-        // Populate SubConcerns dynamically
-        document.getElementById('ConcernId').addEventListener('change', function(){
-            const concernId=this.value;
+        // Load SubConcerns
+
+        document.getElementById("ConcernId").addEventListener("change", function () {
+
+            const concernId = this.value;
+
             fetch(`/CustomForm/GetSubConcerns?concernId=${concernId}`)
-                .then(res=>res.json())
-                .then(data=>{
-                    const subWrapper=document.getElementById('SubConcernWrapper');
-                    const optionsContainer=subWrapper.querySelector('.custom-select-options');
-                    const hiddenSelect=document.getElementById('SubConcernId');
+                .then(res => res.json())
+                .then(data => {
 
-                    optionsContainer.innerHTML='';
-                    hiddenSelect.innerHTML='<option value="">-- Select Sub Concern --</option>';
+                    const subWrapper = document.getElementById("SubConcernWrapper");
+                    const optionsContainer = subWrapper.querySelector(".custom-select-options");
+                    const hiddenSelect = document.getElementById("SubConcernId");
 
-                    data.forEach(item=>{
-                        const div=document.createElement('div');
-                        div.dataset.value=item.subConcernId;
-                        div.textContent=item.name;
+                    optionsContainer.innerHTML = "";
+                    hiddenSelect.innerHTML = '<option value="">-- Select Sub Concern --</option>';
+
+                    data.forEach(item => {
+
+                        const div = document.createElement("div");
+                        div.dataset.value = item.subConcernId;
+                        div.textContent = item.name;
+
                         optionsContainer.appendChild(div);
 
-                        const opt=document.createElement('option');
-                        opt.value=item.subConcernId;
-                        opt.textContent=item.name;
+                        const opt = document.createElement("option");
+                        opt.value = item.subConcernId;
+                        opt.textContent = item.name;
+
                         hiddenSelect.appendChild(opt);
+
                     });
 
-                    subWrapper.querySelector('.custom-select-selected').textContent='-- Select Sub Concern --';
-                    hiddenSelect.value='';
+                    subWrapper.querySelector(".custom-select-selected").textContent = "-- Select Sub Concern --";
+                    hiddenSelect.value = "";
+
                 });
+
         });
 
-        // -------- Dynamic Fields --------
-        let fieldIndex=1;
-        const fieldsContainer=document.getElementById("fields-container");
-        const form=document.querySelector("form");
+        // Dynamic Fields
 
-        fieldsContainer.addEventListener("click", function(e){
-            if(e.target.classList.contains("add-option")){
-                const parent=e.target.closest(".options-box");
-                const newInput=document.createElement("input");
-                newInput.type="text";
-                newInput.className="form-control";
-                newInput.placeholder="Enter options";
-                const removeBtn=document.createElement("button");
-                removeBtn.type="button";
-                removeBtn.className="btn btn-danger btn-sm remove-option";
-                removeBtn.textContent="-";
-                const wrapper=document.createElement("div");
-                wrapper.style.display="flex";
-                wrapper.style.alignItems="center";
-                wrapper.style.gap="4px";
-                wrapper.appendChild(newInput);
+        let fieldIndex = 1;
+
+        const fieldsContainer = document.getElementById("fields-container");
+        const form = document.querySelector("form");
+
+        fieldsContainer.addEventListener("click", function (e) {
+
+            // Add Option
+
+            if (e.target.classList.contains("add-option")) {
+
+                const parent = e.target.closest(".options-box");
+
+                const wrapper = document.createElement("div");
+                wrapper.style.display = "flex";
+                wrapper.style.gap = "4px";
+
+                const input = document.createElement("input");
+                input.type = "text";
+                input.className = "form-control";
+                input.placeholder = "Option value";
+
+                const removeBtn = document.createElement("button");
+                removeBtn.type = "button";
+                removeBtn.className = "btn btn-danger btn-sm remove-option";
+                removeBtn.textContent = "-";
+
+                wrapper.appendChild(input);
                 wrapper.appendChild(removeBtn);
-                parent.insertBefore(wrapper,e.target);
+
+                parent.insertBefore(wrapper, e.target);
             }
-            if(e.target.classList.contains("remove-option")) e.target.closest("div").remove();
-            if(e.target.classList.contains("add-field")){
-                const div=document.createElement("div");
+
+            // Remove Option
+
+            if (e.target.classList.contains("remove-option")) {
+                e.target.closest("div").remove();
+            }
+
+            // Add Field
+
+            if (e.target.classList.contains("add-field")) {
+
+                const div = document.createElement("div");
+
                 div.classList.add("field-item","mb-3","d-flex","align-items-center","gap-2");
-                div.innerHTML=`
-                    <input name="Fields[${fieldIndex}].Label" class="form-control" placeholder="Field Name" maxlength="100" required />
-                    <select name="Fields[${fieldIndex}].FieldType" class="form-control field-type">
+
+                div.innerHTML = `
+                    <input name="Fields[${fieldIndex}].Label"
+                           class="form-control"
+                           placeholder="Field Name"
+                           required />
+
+                    <select name="Fields[${fieldIndex}].FieldType"
+                            class="form-control field-type">
+
                         <option value="">Select FieldType</option>
-                        <option value="Text">Text</option>
+                        <option value="Text">Textbox</option>
+                        <option value="Textarea">Textarea</option>
+                        <option value="Date">Date</option>
                         <option value="Number">Number</option>
-                        <option value="Select">Select</option>
+                        <option value="Select">Dropdown</option>
+                        <option value="File">File</option>
+                        <option value="Time">Time</option>
                         <option value="Radio">Radio</option>
                         <option value="Checkbox">Checkbox</option>
-                        <option value="Date">Date</option>
-                        <option value="File">File</option>
+
                     </select>
+
                     <div class="number-range d-none d-flex gap-2">
-                        <input name="Fields[${fieldIndex}].MinValue" class="form-control" placeholder="Min" />
-                        <input name="Fields[${fieldIndex}].MaxValue" class="form-control" placeholder="Max" />
+                        <input name="Fields[${fieldIndex}].MinValue" class="form-control" placeholder="Min"/>
+                        <input name="Fields[${fieldIndex}].MaxValue" class="form-control" placeholder="Max"/>
                     </div>
+
                     <div class="text-maxlength d-none d-flex gap-2">
-                        <input name="Fields[${fieldIndex}].MaxLength" type="number" class="form-control" placeholder="Enter Max Length" />
+                        <input name="Fields[${fieldIndex}].MaxLength" type="number" class="form-control" placeholder="Max Length"/>
                     </div>
+
                     <div class="options-box d-none d-flex gap-2">
-                        <input name="Fields[${fieldIndex}].Options" class="form-control" placeholder="Enter options" />
+                        <input name="Fields[${fieldIndex}].Options[0]" class="form-control" placeholder="Option value"/>
+                        <button type="button" class="btn btn-success btn-sm add-option">+</button>
                     </div>
-                    <button type="button" class="btn btn-success btn-sm add-option">Add</button>
+
+                    <div class="file-settings d-none d-flex gap-2">
+
+                        <input name="Fields[${fieldIndex}].MaxFileSize"
+                               type="number"
+                               class="form-control"
+                               placeholder="Max MB">
+                    </div>
+
+                     <div class="date-settings d-none d-flex gap-2">
+                            <input name="Fields[${fieldIndex}].MinDate"
+                                    type="date"
+                                    class="form-control">
+
+                             <input name="Fields[${fieldIndex}].MaxDate"
+                                    type="date"
+                                    class="form-control">
+                        </div>
+
+                        <div class="time-range d-none d-flex gap-2">
+                                    <input name="Fields[${fieldIndex}].StartTime"
+                                        type="time"
+                                        class="form-control">
+                                    <input name="Fields[${fieldIndex}].EndTime"
+                                        type="time"
+                                        class="form-control">
+                        </div>
+
                     <button type="button" class="btn btn-danger btn-sm remove-field">-</button>
                 `;
+
                 fieldsContainer.appendChild(div);
+
                 fieldIndex++;
             }
-            if(e.target.classList.contains("remove-field")){
+
+            // Remove Field
+
+            if (e.target.classList.contains("remove-field")) {
                 e.target.closest(".field-item").remove();
                 reIndexFields();
             }
+
         });
 
-        fieldsContainer.addEventListener("change", function(e){
-            if(!e.target.classList.contains("field-type")) return;
-            const parent=e.target.closest(".field-item");
-            const numberRange=parent.querySelector(".number-range");
-            const textMax=parent.querySelector(".text-maxlength");
-            const optionsBox=parent.querySelector(".options-box");
+        // Field Type Change
+
+        fieldsContainer.addEventListener("change", function (e) {
+
+            if (!e.target.classList.contains("field-type")) return;
+
+            const parent = e.target.closest(".field-item");
+
+            const numberRange = parent.querySelector(".number-range");
+            const textMax = parent.querySelector(".text-maxlength");
+            const optionsBox = parent.querySelector(".options-box");
+            const fileSettings = parent.querySelector(".file-settings");
+            const dateSettings = parent.querySelector(".date-settings");
+            const timeRange = parent.querySelector(".time-range");
+
             numberRange?.classList.add("d-none");
             textMax?.classList.add("d-none");
             optionsBox?.classList.add("d-none");
-            if(e.target.value==="Number") numberRange?.classList.remove("d-none");
-            if(e.target.value==="Text") textMax?.classList.remove("d-none");
-            if(["Select","Radio","Checkbox"].includes(e.target.value)) optionsBox?.classList.remove("d-none");
+            fileSettings?.classList.add("d-none");
+            dateSettings?.classList.add("d-none");
+            timeRange?.classList.add("d-none");
+
+            const type = e.target.value;
+
+            if (type === "Number")
+                numberRange?.classList.remove("d-none");
+
+            if (type === "Text" || type === "Textarea")
+                textMax?.classList.remove("d-none");
+
+            if (["Select","Radio","Checkbox"].includes(type))
+                optionsBox?.classList.remove("d-none");
+
+            if (type === "File")
+                fileSettings?.classList.remove("d-none");
+
+            if (type === "Date")
+                dateSettings?.classList.remove("d-none");
+
+            if (type === "Time")
+                timeRange?.classList.remove("d-none");
+
         });
+
+        // ReIndex Fields
 
         function reIndexFields(){
-            const items=document.querySelectorAll("#fields-container .field-item");
+
+            const items = document.querySelectorAll("#fields-container .field-item");
+
             items.forEach((item,index)=>{
+
                 item.querySelectorAll("input,select").forEach(input=>{
-                    if(input.name) input.name=input.name.replace(/Fields\[\d+\]/,`Fields[${index}]`);
+
+                    if(input.name){
+                        input.name = input.name.replace(/Fields\[\d+\]/,`Fields[${index}]`);
+                    }
+
                 });
-                const optionInputs=item.querySelectorAll(".options-box input");
-                optionInputs.forEach((opt,i)=> opt.name=`Fields[${index}].Options[${i}]`);
+
             });
+
         }
 
-        form.addEventListener("submit", function(e){
+        // Submit Validation
+
+        form.addEventListener("submit",function(e){
+
             reIndexFields();
-            let isValid=true;
+
+            let isValid = true;
+
             document.querySelectorAll(".field-item").forEach(item=>{
-                const type=item.querySelector(".field-type").value;
-                const maxLengthInput=item.querySelector(".text-maxlength input");
-                const optionsInputs=item.querySelectorAll(".options-box input");
-                if(type==="Text"){
-                    if(!maxLengthInput||!maxLengthInput.value||maxLengthInput.value<=0){alert("Max Length required for Text field.");isValid=false;}
+
+                const type = item.querySelector(".field-type").value;
+                const maxLength = item.querySelector(".text-maxlength input");
+                const options = item.querySelectorAll(".options-box input");
+
+                if(type==="Text" || type==="Textarea"){
+                    if(!maxLength || !maxLength.value){
+                        alert("Max Length required");
+                        isValid=false;
+                    }
                 }
+
                 if(["Select","Radio","Checkbox"].includes(type)){
-                    if(!optionsInputs||Array.from(optionsInputs).every(opt=>!opt.value.trim())){alert("Options required for Select/Radio/Checkbox field.");isValid=false;}
+                    if(!options || Array.from(options).every(o=>!o.value.trim())){
+                        alert("Options required");
+                        isValid=false;
+                    }
                 }
+
             });
+
             if(!isValid) e.preventDefault();
+
         });
+
     </script>
 }

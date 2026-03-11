@@ -63,6 +63,14 @@ namespace ManvarFitness.Models
         public int? MinValue { get; set; }
         public int? MaxValue { get; set; }
         public int? MaxLength { get; set; }
+        public DateOnly Date { get; set; }
+        public bool IsDeleted { get; set; }
+        public bool IsDefault { get; set; }
+        public TimeSpan? StartTime { get; set; }
+        public TimeSpan? EndTime { get; set; }
+
+        public string? VideoType { get; set; }
+        public int? MaxFileSize { get; set; }
     }
 
     public class FormAnswerModel

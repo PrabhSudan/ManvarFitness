@@ -3,6 +3,7 @@ using System;
 using ManvarFitness.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ManvarFitness.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260310095412_intialcreate004")]
+    partial class intialcreate004
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -118,9 +121,6 @@ namespace ManvarFitness.Migrations
                     b.Property<int?>("CustomFormId")
                         .HasColumnType("integer");
 
-                    b.Property<DateOnly?>("Date")
-                        .HasColumnType("date");
-
                     b.Property<TimeSpan?>("EndTime")
                         .HasColumnType("interval");
 
@@ -128,9 +128,6 @@ namespace ManvarFitness.Migrations
                         .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsDefault")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
@@ -142,6 +139,9 @@ namespace ManvarFitness.Migrations
                     b.Property<string>("Label")
                         .HasColumnType("text");
 
+                    b.Property<DateOnly?>("MaxDate")
+                        .HasColumnType("date");
+
                     b.Property<int?>("MaxFileSize")
                         .HasColumnType("integer");
 
@@ -150,6 +150,9 @@ namespace ManvarFitness.Migrations
 
                     b.Property<int?>("MaxValue")
                         .HasColumnType("integer");
+
+                    b.Property<DateOnly?>("MinDate")
+                        .HasColumnType("date");
 
                     b.Property<int?>("MinValue")
                         .HasColumnType("integer");

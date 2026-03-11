@@ -21,6 +21,7 @@
         return allowedPageUrls.Any(url => url.StartsWith($"/{controller}"));
     }
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -45,24 +46,26 @@
         <div class="dropdown text-end position-relative">
             <a class="d-flex align-items-center justify-content-center text-decoration-none dropdown-toggle"
                href="#" id="profileDropdown" data-bs-toggle="dropdown">
-                👤
+                <i class="bi bi-person-circle fs-4 text-black"></i>
             </a>
 
-            <div class="dropdown-menu dropdown-menu-end shadow p-0 mt-2 border-0 rounded-3"
-                 aria-labelledby="profileDropdown" style="min-width: 200px;">
-                <div class="card border-0 rounded-3">
-                    <div class="card-body p-3" style="background-color: #fff;">
-                        <h6 class="card-title mb-2" style="color: #333;">Name: @Name</h6>
+            <div class="dropdown-menu dropdown-menu-end shadow p-0 mt-2 border-0 rounded-3 text-center"
+                 aria-labelledby="profileDropdown" style="min-width:250px;">
+                <div class="p-3">
 
-                        <h6 class="card-title mb-2" style="color: #333;">Role: @role</h6>
+                    <i class="bi bi-person-circle fs-1" style="color:#FF7F11;"></i>
 
-                        <form method="post" asp-controller="Auth" asp-action="Logout">
-                            <button type="submit" class="btn w-100 fw-semibold text-white"
-                                    style="background-color: #FF7F11; border-radius: 8px; transition: background 0.3s;">
-                                Logout
-                            </button>
-                        </form>
-                    </div>
+                    <h6 class="mt-2 mb-1">Name: @Name</h6>
+                    <h6 class="mb-3">Role: @role</h6>
+
+                    <form method="post" asp-controller="Auth" asp-action="Logout">
+                        <button type="submit"
+                                class="btn w-100 fw-semibold text-white"
+                                style="background-color:#FF7F11; border-radius:8px;">
+                            Logout
+                        </button>
+                    </form>
+
                 </div>
             </div>
         </div>
@@ -73,7 +76,7 @@
             <ul>
                 @if (HasAccess("Dashboard"))
                 {
-                    <li class="@(currentController == "Dashboard" ? "active" : "")">
+                    <li class="@(currentController == "Dashboard" ? "active" : "")" >
                         <a asp-controller="Dashboard" asp-action="Index">Dashboard</a>
                     </li>
                 }
@@ -81,12 +84,12 @@
                 @if (HasAccess("Customers") || HasAccess("AdminUser") || HasAccess("UserRoles") || HasAccess("RoleMenu"))
                 {
                     <li class="dropdown-li @(currentController == "Customers" || currentController == "AdminUser" || currentController == "UserRoles" || currentController == "RoleMenu" ? "activeparent" : "" )">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usersSubmenu">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#usersSubmenu" style="font-size:20px">
                             Users
                         </a>
 
                         <ul class="collapse list-unstyled ps-3 @(currentController == "Customers" || currentController == "AdminUser" || currentController == "UserRoles" || currentController == "RoleMenu" ? "show" : "")"
-                            id="usersSubmenu">
+                            id="usersSubmenu" style="font-size:16px">
 
                             @if (HasAccess("Customers"))
                             {
@@ -122,7 +125,7 @@
                 @if (HasAccess("Result"))
                 {
                     <li class="dropdown-li @(currentController == "Result" ? "activeparent" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#resultsSubmenu">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#resultsSubmenu" style="font-size:20px">
                             Result
                         </a>
 
@@ -131,7 +134,7 @@
 
                             @if (HasAccess("Result"))
                             {
-                                <li class="@(currentController == "Result" ? "active" : "")">
+                                <li class="@(currentController == "Result" ? "active" : "")" style="font-size:16px">
                                     <a asp-controller="Result" asp-action="Index">Result Overview</a>
                                 </li>
                             }
@@ -143,7 +146,7 @@
                 @if (HasAccess("ConcernCategory") || HasAccess("SubConcern") || HasAccess("CustomForm"))
                 {
                     <li class="dropdown-li @(currentController == "ConcernCategory" || currentController == "SubConcern" || currentController == "CustomForm" ? "activeparent" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#concernsSubmenu">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#concernsSubmenu" style="font-size:20px">
                             Concerns
                         </a>
 
@@ -178,7 +181,7 @@
                 @if (HasAccess("Diet") || HasAccess("DietPlan"))
                 {
                     <li class="dropdown-li @(currentController == "Diet" || currentController == "DietPlan" ? "active-parent" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#dietSubmenu">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#dietSubmenu" style="font-size:20px">
                             Diet Plans
                         </a>
 
@@ -205,7 +208,7 @@
                 @if (HasAccess("Workout", "Videos") || HasAccess("YogaExercise") || HasAccess("Meditation"))
                 {
                     <li class="dropdown-li @(currentController == "Workout" || currentController == "YogaExercise" || currentController == "Meditation" ? "active-parent" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#workoutSubmenu">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#workoutSubmenu" style="font-size:20px">
                             Workouts
                         </a>
 
@@ -239,7 +242,7 @@
                 @if (HasAccess("Herbs") || HasAccess("HerbsCategory"))
                 {
                     <li class="dropdown-li @(currentController == "Herbs" || currentController == "HerbsCategory" ? "activeparent" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#herbsSubmenu">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#herbsSubmenu" style="font-size:20px">
                             Herbs
                         </a>
                         <ul class="collapse list-unstyled ps-3 @(currentController == "Herbs" || currentController == "HerbsCategory" ? "show" : "")"
@@ -265,7 +268,7 @@
                 @if (HasAccess("Revenue") || HasAccess("Payments"))
                 {
                     <li class="dropdown-li @(currentController == "Revenue" || currentController == "Payments" ? "activeparent" : "")">
-                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#revenueSubmenu">
+                        <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#revenueSubmenu" style="font-size:20px">
                             Revenue
                         </a>
 

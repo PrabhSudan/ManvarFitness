@@ -9,22 +9,32 @@
         .form-check-input:checked {
             background-color: #FF7F11; /* ON orange */
         }
+
+        .form-check-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
 </style>
 
 @{
     ViewData["Title"] = "Workout Videos";
 }
- <h1 class="fw-semibold mb-0" style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">Workout Videos</h1>
+
+<div style="text-align: center;">
+    <h1 class="fw-semibold mb-4" style="display: inline-block;color: #333;padding-bottom: 6px;border-bottom: 3px solid #FF7F11;border-radius: 0.5px;">
+        @ViewData["Title"]
+    </h1>
+</div>
+
+@Html.AntiForgeryToken()
+
 <div class="container-fluid">
-    @Html.AntiForgeryToken()
-    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-        
+
         <a asp-controller="Workout"
            asp-action="Upload"
-           class="btn btn-success btn-sm ">
+           class="btn btn-success mb-3" >
             Upload New Video
         </a>
-    </div><br />
     <div class="row">
         @foreach (var video in Model)
         {

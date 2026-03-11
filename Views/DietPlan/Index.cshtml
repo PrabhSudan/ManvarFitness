@@ -56,30 +56,38 @@
 
 @Html.AntiForgeryToken()
 
-<form method="get" asp-action="Index" class="mb-3">
+<div style="text-align: center;">
+    <h1 class="fw-semibold mb-4" style="display: inline-block;color: #333;padding-bottom: 6px;border-bottom: 3px solid #FF7F11;border-radius: 0.5px;">
+        @ViewData["Title"]
+    </h1>
+</div>
+
+<form method="get" asp-action="Index" class=" d-flex justify-content-between align-items-center flex-wrap gap-2"">
     <!-- Main Concern -->
-    <label for="concernSelect" class="form-label">Select Concern:</label>
-    <select id="concernSelect" name="concernId" class="form-select w-50" onchange="this.form.submit()">
-        <option value="">-- Select Concern --</option>
-        @foreach (var c in ViewBag.ConcernsList)
-        {
-            if (Model.ConcernId == c.ConcernId)
+    <div class="d-flex flex-column">
+        <label for="concernSelect" class="form-label">Select Concern:</label>
+        <select id="concernSelect" name="concernId" class="form-select" style="width: 250px;" onchange="this.form.submit()">
+            <option value="">-- Select Concern --</option>
+            @foreach (var c in ViewBag.ConcernsList)
             {
-                <option value="@c.ConcernId" selected>@c.Name</option>
+                if (Model.ConcernId == c.ConcernId)
+                {
+                    <option value="@c.ConcernId" selected>@c.Name</option>
+                }
+                else
+                {
+                    <option value="@c.ConcernId">@c.Name</option>
+                }
             }
-            else
-            {
-                <option value="@c.ConcernId">@c.Name</option>
-            }
-        }
-    </select>
+        </select>
+    </div>
 
     <!-- Sub-Concern: show only if there are sub-concerns -->
     @if (ViewBag.SubConcernsList != null && ((List<SubConcerns>)ViewBag.SubConcernsList).Any())
     {
-        <div class="mt-3">
+        <div class="d-flex flex-column">
             <label for="subconcernSelect" class="form-label">Select Sub Concern:</label>
-            <select id="subconcernSelect" name="subconcernId" class="form-select w-50" onchange="this.form.submit()">
+            <select id="subconcernSelect" name="subconcernId" class="form-select" style="width: 250px;" onchange="this.form.submit()">
                 <option value="">-- Select Sub Concern --</option>
                 @foreach (var sc in (List<SubConcerns>)ViewBag.SubConcernsList)
                 {
@@ -96,8 +104,6 @@
         </div>
     }
 </form>
-
-<h2>@ViewData["Title"]</h2>
 
 <div style="overflow-x: auto;">
     <table class="table table-bordered diet-table">

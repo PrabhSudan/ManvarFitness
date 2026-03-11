@@ -11,23 +11,61 @@
         .form-check-input:checked {
             background-color: #FF7F11; /* orange when ON */
         }
+
+        .form-check-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+    .customers-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+
+        .customers-table th {
+            text-align: center;
+            padding: 0.75rem;
+            color: black;
+            border: 1px solid black;
+            background-color: #f8f8f8; /* header white */
+        }
+
+        .customers-table td {
+            text-align: center;
+            padding: 0.6rem;
+            border: 1px solid #d1d5db;
+            vertical-align: middle;
+            background-color: white;
+        }
+
+        .customers-table tbody tr {
+            background-color: #f9fafb;
+        }
+
+    .center-cell {
+        display: flex;
+        justify-content: center; /* horizontal */
+        align-items: center; /* vertical */
+        gap: 4px; /* spacing between buttons/text */
+    }
 </style>
 @{
     ViewData["Title"] = "Manage Categories";
 }
 
-<h2 class="fw-semibold mb-3"
-    style="display: inline-block; color: #333; padding-bottom: 4px; border-bottom: 3px solid #FF7F11; border-radius: 2px;">
-    Manage Categories
-</h2><br />
+<div style="text-align: center;">
+    <h1 class="fw-semibold mb-4" style="display: inline-block;color: #333;padding-bottom: 6px;border-bottom: 3px solid #FF7F11;border-radius: 0.5px;">
+        @ViewData["Title"]
+    </h1>
+</div>
 
+<a class="btn btn-success mb-3" asp-controller="HerbsCategory" asp-action="Create">Add Category</a>
 
-<a class="btn btn-primary mb-3" asp-controller="HerbsCategory" asp-action="Create">Add Category</a>
-
-<table class="table table-bordered table-hover align-middle">
+<table class="customers-table">
     <thead class="table-light">
         <tr>
-            <th style="width:80%">Category</th>
+            <th style="width:80%; text-align:left;">Category</th>
             <th style="width:10%">Status</th>
             <th style="width:10%">Action</th>
         </tr>
@@ -36,9 +74,9 @@
         @foreach (var category in Model)
         {
             <tr>
-                <td>@category.Name</td>
+                <td style="width:80%; text-align:left;">@category.Name</td>
                 <td>
-                    <div class="form-check form-switch text-center">
+                    <div class="form-check form-switch d-inline-block m-0">
                         <input class="form-check-input toggle-status"
                                type="checkbox"
                                data-categoryid="@category.Id"
@@ -47,14 +85,16 @@
                         <label class="form-check-label" for="switchCategory@category.Id"></label>
                     </div>
                 </td>
-                <td class="text-center">
-                    <button type="button"
-                            class="btn btn-sm text-warning me-1"
-                            data-bs-toggle="modal"
-                            data-bs-target="#deleteModal"
-                            onclick="setDeleteId(@category.Id)">
-                        <i class="bi bi-trash-fill fs-5"></i>
-                    </button>
+                <td >
+                    <div class="center-cell">
+                        <button type="button"
+                                class="btn btn-sm text-warning me-1"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal"
+                                onclick="setDeleteId(@category.Id)">
+                            <i class="bi bi-trash-fill fs-5"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         }

@@ -20,28 +20,37 @@ namespace ManvarFitness.Controllers
             ViewBag.Concerns = _context.Concerns.ToList();
             ViewBag.SelectedConcern = concernId;
 
-            var fields = _context.CustomFields
+            // Base query: default fields (IsDefault) + fields from forms for this concern
+            var fieldsQuery = _context.CustomFields
                 .Include(f => f.CustomForm)
-                .ThenInclude(cf => cf.Concern)
                 .AsQueryable();
 
             if (concernId.HasValue)
             {
-                fields = fields.Where(f => f.CustomFormId == null || f.CustomForm.ConcernId == concernId);
+                // Fields either default or attached to a form of this concern
+                fieldsQuery = fieldsQuery.Where(f =>
+                    f.IsDefault ||
+                    (f.CustomForm != null && f.CustomForm.ConcernId == concernId.Value)
+                );
+            }
+            else
+            {
+                // Just defaults if no concern selected
+                fieldsQuery = fieldsQuery.Where(f => f.IsDefault);
             }
 
-            return View(fields.ToList());
+            var fields = fieldsQuery.OrderBy(f => f.CustomFieldId).ToList();
+
+            return View(fields);
         }
 
         // CREATE GET
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.ConcernsList = new SelectList(
-                _context.Concerns.ToList(),
-                "ConcernId",
-                "Name"
-            );
+            ViewBag.ConcernsList = _context.Concerns
+                .Select(c => new { Value = c.ConcernId, Text = c.Name })
+                .ToList();
 
             ViewBag.SubConcernsList = new SelectList(
                 _context.SubConcerns.ToList(),
@@ -54,17 +63,8 @@ namespace ManvarFitness.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(CustomFormModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.ConcernsList = new SelectList(_context.Concerns.ToList(), "ConcernId", "Name", model.ConcernId);
-                ViewBag.SubConcernsList = new SelectList(
-                    _context.SubConcerns.Where(s => s.ConcernId == model.ConcernId).ToList(),
-                    "SubConcernId", "Name", model.SubConcernId
-                );
-                return View(model);
-            }
+            if (!ModelState.IsValid) return View(model);
 
-            // Create CustomForm first
             var form = new CustomForm
             {
                 Name = model.Name,
@@ -76,6 +76,7 @@ namespace ManvarFitness.Controllers
             _context.CustomForms.Add(form);
             _context.SaveChanges();
 
+            // Save only the user-added fields
             if (model.Fields != null && model.Fields.Any())
             {
                 var fields = model.Fields.Select(f => new CustomField
@@ -85,16 +86,21 @@ namespace ManvarFitness.Controllers
                     MinValue = f.MinValue,
                     MaxValue = f.MaxValue,
                     MaxLength = f.MaxLength,
-                    IsActive = f.IsActive,
+                    IsActive = true,
                     IsRequired = f.IsRequired,
-                    CustomFormId = form.CustomFormId
+                    Options = f.Options,
+                    Date = f.Date,
+                    StartTime = f.StartTime,
+                    EndTime = f.EndTime,
+                    MaxFileSize = f.MaxFileSize,
+                    CustomFormId = form.CustomFormId,  // attach to this form
                 }).ToList();
 
                 _context.CustomFields.AddRange(fields);
                 _context.SaveChanges();
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { concernId = model.ConcernId });
         }
 
         // Fill FORM
@@ -163,15 +169,38 @@ namespace ManvarFitness.Controllers
         public IActionResult DeleteField(int id)
         {
             var field = _context.CustomFields.Find(id);
+
             if (field == null)
             {
                 return Json(new { success = false });
             }
 
-            field.IsActive = false; // soft delete
+            field.IsDeleted = true;   // correct soft delete
+            field.IsActive = false;
+
             _context.SaveChanges();
 
             return Json(new { success = true });
+        }
+
+        private void EnsureDefaultFields()
+        {
+            // Check if defaults already exist
+            if (!_context.CustomFields.Any(f => f.IsDefault))
+            {
+                var defaultFields = new List<CustomField>
+                {
+                    new CustomField { Label = "Name", FieldType = "Text", MaxLength=100,IsDefault = true, IsActive = true },
+                    new CustomField { Label = "Age", FieldType = "Number", MinValue = 1, MaxValue = 120, IsDefault = true, IsActive = true },
+                    new CustomField { Label = "Gender", FieldType = "Select", Options = "Male,Female,Other", IsDefault = true, IsActive = true },
+                    new CustomField { Label = "Height (Feet)", FieldType = "Number", MinValue = 1, MaxValue = 8, IsDefault = true, IsActive = true },
+                    new CustomField { Label = "Height (Inches)", FieldType = "Number", MinValue = 0, MaxValue = 11, IsDefault = true, IsActive = true },
+                    new CustomField { Label = "Weight (Kg)", FieldType = "Number", MinValue = 1, MaxValue = 300, IsDefault = true, IsActive = true }
+                };
+
+                _context.CustomFields.AddRange(defaultFields);
+                _context.SaveChanges();
+            }
         }
     }
 }

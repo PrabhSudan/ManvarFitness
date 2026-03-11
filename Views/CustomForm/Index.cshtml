@@ -11,14 +11,49 @@
         .form-check-input:checked {
             background-color: #FF7F11; /* orange when ON */
         }
+
+        .form-check-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+    .customers-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+
+        .customers-table th {
+            text-align: center;
+            padding: 0.75rem;
+            color: black;
+            border: 1px solid black;
+            background-color: #f8f8f8; /* header white */
+        }
+
+        .customers-table td {
+            text-align: center;
+            padding: 0.6rem;
+            border: 1px solid #d1d5db;
+            vertical-align: middle;
+            background-color: white;
+        }
+
+        .customers-table tbody tr {
+            background-color: #f9fafb;
+        }
+
 </style>
 @{
     ViewData["Title"] = "Manage Fields";
 }
 @Html.AntiForgeryToken()
-<h2 class="fw-semibold mb-3" style="display:inline-block; border-bottom:3px solid #FF7F11;">
-    Manage Fields
-</h2>
+
+<div style="text-align: center;">
+    <h1 class="fw-semibold mb-3" style="display: inline-block;color: #333;padding-bottom: 6px;border-bottom: 3px solid #FF7F11;border-radius: 0.5px;">
+        @ViewData["Title"]
+    </h1>
+</div>
 <!-- Concern Dropdown -->
 <form method="get" class="mb-3">
     <div class="input-group" style="max-width: 300px;">
@@ -34,8 +69,8 @@
     </div>
 </form>
 
-<table class="table table-bordered table-hover">
-    <thead class="table-light">
+<table class="customers-table">
+    <thead>
         <tr>
             <th>Field</th>
             <th>Field Type</th>
@@ -52,36 +87,54 @@
                 <td>@field.Label</td>
                 <td>@field.FieldType</td>
                 <td>
+
                     @if (field.MinValue != null || field.MaxValue != null)
                     {
                         @($"{field.MinValue ?? 0} - {field.MaxValue ?? 0}")
                     }
+
                     else if (field.MaxLength != null)
                     {
                         @($"Max {field.MaxLength}")
                     }
+
                     else if (field.Options != null && field.Options.Any())
                     {
                         @string.Join(", ", field.Options)
                     }
+
+                    else if (field.Date != null)
+                    {
+                        @($"{field.Date?.ToShortDateString()}")
+                    }
+
+                    else if (field.StartTime != null || field.EndTime != null)
+                    {
+                        @($"{field.StartTime} - {field.EndTime}")
+                    }
+
+                    else if ( field.MaxFileSize != null)
+                    {
+                        @($"{field.MaxFileSize} MB")
+                    }
+
                 </td>
                 <td class="text-center">
-                    <div class="form-check form-switch">
+                    <div class="form-check form-switch d-inline-block m-0">
                         <input class="form-check-input toggle-active" type="checkbox"
                                data-id="@field.CustomFieldId"
                                @(field.IsActive ? "checked" : "")>
                     </div>
                 </td>
                 <td class="text-center">
-                    <div class="form-check form-switch">
+                    <div class="form-check form-switch d-inline-block m-0">
                         <input class="form-check-input toggle-required" type="checkbox"
                                data-id="@field.CustomFieldId"
                                @(field.IsRequired ? "checked" : "")>
                     </div>
                 </td>
                 <td class="text-center">
-                    <button type="button"
-                            class="btn btn-sm text-warning me-1"
+                    <button type="button" class="btn btn-sm" style="color:darkorange;"
                             data-bs-toggle="modal"
                             data-bs-target="#deleteModal"
                             data-fieldid="@field.CustomFieldId"
@@ -93,7 +146,7 @@
         }
     </tbody>
 </table>
-
+<br />
 <a asp-action="Create" class="btn btn-success px-4 py-2 fw-semibold">Add New Field</a>
 
 <!-- Delete Modal -->
