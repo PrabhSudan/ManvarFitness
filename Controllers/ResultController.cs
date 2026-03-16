@@ -82,9 +82,15 @@ namespace ManvarFitness.Controllers
                 return RedirectToAction("Login", "Auth"); 
             }
 
+            else if (model.UserId == null && string.IsNullOrEmpty(model.PersonName))
+            {
+                ModelState.AddModelError("", "Select a user or enter a name.");
+                return View(model);
+            }
             var entity = new ResultEntity
             {
                 UserId = model.UserId,
+                PersonName = model.PersonName,
                 ConcernCategoryId = concernId,
                 SubConcernId = model.SubConcernId,
                 Description = model.Description,
