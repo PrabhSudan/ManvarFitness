@@ -1,0 +1,90 @@
+﻿@model ManvarFitness.Models.UserSubscriptionModel
+
+@{
+    ViewData["Title"] = "Subscription Details";
+}
+
+<div style="text-align:center;">
+    <h1 class="fw-semibold mb-3"
+        style="display:inline-block;color:#333;padding-bottom:4px;border-bottom:3px solid #FF7F11;">
+        @ViewData["Title"]
+    </h1>
+</div>
+
+<div class="container-fluid px-4">
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+
+            <h5 class="fw-semibold mb-4">Customer Subscription Info</h5>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Customer Name:</strong>
+                    <span>@Model.UserName</span>
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Plan:</strong>
+                    <span>@Model.PlanName</span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Amount:</strong>
+                    <span>@(Model.Amount + Model.Currency)</span>
+                </div>
+
+                <div class="col-md-6">
+                    <strong>Payment Method</strong>
+                    <span>@Model.PaymentGateway</span>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Start Date:</strong>
+                    <span>@Model.StartDate.ToString("dd MMM yyyy")</span>
+                </div>
+
+                <div class="col-md-6">
+                    <strong>End Date:</strong>
+                    <span>@Model.EndDate.ToString("dd MMM yyyy")</span>
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Status:</strong>
+
+                    @if (Model.Status == "Active")
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Expired</span>
+                    }
+                </div>
+
+
+                <div class="col-md-6">
+                    <strong>Days Left:</strong>
+                    @{
+                        var days = (Model.EndDate - DateTime.UtcNow).Days;
+                    }
+                    <span>@(days > 0 ? days + " days" : "Expired")</span>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <a asp-action="Index" class="btn btn-secondary">
+                    Back 
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace ManvarFitness.Views.User
+namespace ManvarFitness.Views.Customers
 {
-    public class DetailsModel : PageModel
+    public class SubscriptionDetailsModel : PageModel
     {
         public void OnGet()
         {

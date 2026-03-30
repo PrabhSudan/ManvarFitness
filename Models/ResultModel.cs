@@ -7,7 +7,7 @@ namespace ManvarFitness.Models
         public int ResultId { get; set; }
         // User selection
         [Required(ErrorMessage = "Please Select a User")]
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         // Concern Category selection
         [Required(ErrorMessage = "Please Select a Concern")]
         public string? PersonName { get; set; }

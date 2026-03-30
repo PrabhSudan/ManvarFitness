@@ -9,7 +9,7 @@ namespace ManvarFitness.Entity
         public int ResultId { get; set; }
 
         // Foreign key to User
-        public int? UserId { get; set; }
+        public Guid? UserId { get; set; }
         [ForeignKey("UserId")]
         public User? User { get; set; }
 

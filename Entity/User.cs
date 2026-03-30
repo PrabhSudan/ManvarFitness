@@ -2,7 +2,7 @@
 {
     public class User :BaseEntity
     {
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public string? Name { get; set; }
         public string? CountryCode { get; set; }
         public string? Mobile { get; set; }

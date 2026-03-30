@@ -15,9 +15,9 @@ namespace ManvarFitness.Entity
         // Filled AFTER login (profile update)
         public string? Role  {get; set; }
         [Required]
-        public string CountryCode { get; set; }
+        public string? CountryCode { get; set; }
         [Required]
-        public string Mobile { get; set; } 
+        public string? Mobile { get; set; } 
         public bool IsActive { get; set; } 
     }
 }

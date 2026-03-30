@@ -3,6 +3,7 @@ using System;
 using ManvarFitness.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ManvarFitness.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260326083339_initialcreate07")]
+    partial class initialcreate07
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,7 +71,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AdminUsers", (string)null);
+                    b.ToTable("AdminUsers");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.Concerns", b =>
@@ -104,7 +107,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("ConcernId");
 
-                    b.ToTable("Concerns", (string)null);
+                    b.ToTable("Concerns");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.CustomField", b =>
@@ -164,7 +167,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("CustomFormId");
 
-                    b.ToTable("CustomFields", (string)null);
+                    b.ToTable("CustomFields");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.CustomForm", b =>
@@ -211,7 +214,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("SubConcernId");
 
-                    b.ToTable("CustomForms", (string)null);
+                    b.ToTable("CustomForms");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.DietPlan", b =>
@@ -286,7 +289,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("ConcernId");
 
-                    b.ToTable("DietPlans", (string)null);
+                    b.ToTable("DietPlans");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.FormAnswer", b =>
@@ -315,7 +318,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("FormSubmissionFormSubId");
 
-                    b.ToTable("FormAnswer", (string)null);
+                    b.ToTable("FormAnswer");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.FormSubmission", b =>
@@ -353,7 +356,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("CustomFormId");
 
-                    b.ToTable("FormSubmissions", (string)null);
+                    b.ToTable("FormSubmissions");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.HerbCategory", b =>
@@ -387,7 +390,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("HerbCategories", (string)null);
+                    b.ToTable("HerbCategories");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.Page", b =>
@@ -427,7 +430,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Pages", (string)null);
+                    b.ToTable("Pages");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.Plan", b =>
@@ -456,7 +459,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("PlanId");
 
-                    b.ToTable("Plans", (string)null);
+                    b.ToTable("Plans");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.ResultEntity", b =>
@@ -518,7 +521,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Results", (string)null);
+                    b.ToTable("Results");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.Role", b =>
@@ -552,7 +555,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.RolePage", b =>
@@ -589,7 +592,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RolePages", (string)null);
+                    b.ToTable("RolePages");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.SubConcerns", b =>
@@ -630,7 +633,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("ConcernId");
 
-                    b.ToTable("SubConcerns", (string)null);
+                    b.ToTable("SubConcerns");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.User", b =>
@@ -777,7 +780,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WorkoutVideos", (string)null);
+                    b.ToTable("WorkoutVideos");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.CustomField", b =>
