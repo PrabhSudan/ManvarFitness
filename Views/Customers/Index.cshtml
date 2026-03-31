@@ -95,20 +95,21 @@
         <table class="customers-table">
             <thead>
                 <tr>
-                    <th class="width:25%;">Name</th>
-                    <th class="width:25%;">Gender</th>
-                    <th class="width:25%;">Mobile</th>
-                    <th class="width:15%">Plan</th>
-                    <th class="width:10%;">Status</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Mobile</th>
+                    <th>Subscription Plan</th>
+                    <th>Assign Diet Plan</th>
+                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var user in Model)
                 {
                     <tr>
-                        <td class="width:40%;">@(string.IsNullOrEmpty(user.Name) ? "Not Updated" : user.Name)</td>
-                        <td class="width:25%;">@(string.IsNullOrEmpty(user.Gender) ? "Not Updated" : user.Gender)</td>
-                        <td class="width:25%;">@user.Mobile</td>
+                        <td>@(string.IsNullOrEmpty(user.Name) ? "Not Updated" : user.Name)</td>
+                        <td>@(string.IsNullOrEmpty(user.Gender) ? "Not Updated" : user.Gender)</td>
+                        <td>@user.Mobile</td>
                         <td>
                             @if (user.SubscriptionId != null)
                             {
@@ -123,7 +124,14 @@
                                 <span class="text-muted">N/A</span>
                             }
                         </td>
-                        
+                        <td>
+                            <a asp-action="AssignDietPlan"
+                               asp-route-id="@user.UserId"
+                               class="btn btn-sm btn-light border">
+                                <i class="bi bi-eye-fill text-warning"></i>
+                            </a>
+                        </td>
+                         
                         <td class="text-center">
                             <div class="form-check form-switch d-inline-block m-0">
                                 <input class="form-check-input toggle-active"

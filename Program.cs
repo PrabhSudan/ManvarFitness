@@ -2,6 +2,7 @@ using ManvarFitness.Database;
 using ManvarFitness.Interface;
 using ManvarFitness.Repository;
 using Microsoft.EntityFrameworkCore;
+using Rotativa.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
-
+RotativaConfiguration.Setup(builder.Environment.WebRootPath, "Rotativa");
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

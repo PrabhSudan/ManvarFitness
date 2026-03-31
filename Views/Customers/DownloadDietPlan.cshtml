@@ -1,0 +1,108 @@
+﻿@model DietPlanPdfModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Diet Plan</title>
+</head>
+
+<body style="font-family: Arial, sans-serif;">
+
+    <h2 style="text-align:center; color:#333;">
+        Diet Plan Of the Week of @Model.PlanName
+    </h2>
+
+
+    <table style="width:100%; border-collapse:collapse; margin-top:20px; font-size:14px; table-layout:fixed;">
+
+        <thead style="background-color:darkorange; color:Black;">
+            <tr>
+                <th style="border:1px solid black; padding:8px; width:8%;">Day</th>
+                <th style="border:1px solid black; padding:8px; width:10%;">Empty Stomach</th>
+                <th style="border:1px solid black; padding:8px; width:10%;">Early Morning Snack</th>
+                <th style="border:1px solid black; padding:8px; width:10%;">Exercise</th>
+                <th style="border:1px solid black; padding:8px; width:12%;">Breakfast</th>
+                <th style="border:1px solid black; padding:8px; width:12%;">Mid Morning Snack</th>
+                <th style="border:1px solid black; padding:8px; width:12%;">Lunch</th>
+                <th style="border:1px solid black; padding:8px; width:10%;">Evening Snack</th>
+                <th style="border:1px solid black; padding:8px; width:12%;">Dinner</th>
+                <th style="border:1px solid black; padding:8px; width:10%;">Bedtime</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var day in Model.Days)
+            {
+                <tr>
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">@day.DayName</td>
+
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">
+                        @foreach (var item in day.EmptyStomach ?? new List<string>())
+                        {
+                            <div>@item</div>
+                        }
+                    </td>
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">
+                        @foreach (var item in day.EarlyMorningSnack ?? new List<string>())
+                        {
+                            <div>@item</div>
+                        }
+                    </td>
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">
+                        @foreach (var item in day.Exercise ?? new List<string>())
+                        {
+                            <div>@item</div>
+                        }
+                    </td>
+
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">
+                        @foreach (var item in day.Breakfast ?? new List<string>())
+                        {
+                            <div>@item</div>
+                        }
+                    </td>
+
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">
+                        @foreach (var item in day.MidMorningSnack ?? new List<string>())
+                        {
+                            <div>@item</div>
+                        }
+                    </td>
+
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">
+                        @foreach (var item in day.Lunch ?? new List<string>())
+                        {
+                            <div>@item</div>
+                        }
+                    </td>
+
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">
+                        @foreach (var item in day.EveningSnack ?? new List<string>())
+                        {
+                            <div>@item</div>
+                        }
+                    </td>
+
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">
+                        @foreach (var item in day.Dinner ?? new List<string>())
+                        {
+                            <div>@item</div>
+                        }
+                    </td>
+
+                    <td style="border:1px solid black; padding:4px; word-wrap:break-word; white-space:normal;">
+                        @foreach (var item in day.Bedtime ?? new List<string>())
+                        {
+                            <div>@item</div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</body>
+</html>

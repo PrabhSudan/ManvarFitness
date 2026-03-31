@@ -25,6 +25,8 @@ namespace ManvarFitness.Database
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<UserDietPlans> UserDietPlans { get; set; }
+        public DbSet<UserConcern> UserConcerns { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

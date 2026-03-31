@@ -6,12 +6,14 @@ namespace ManvarFitness.Models
     public class DietPlanModel
     {
         public int Id { get; set; }
+        public Guid UserId { get; set; }
         public string? Name { get; set; }
         public bool IsActive { get; set; } = true;
         public int ConcernId { get; set; }
         public Concerns? Concern { get; set; }
         public int SubConcernId { get; set; }
         public SubConcerns? SubConcern { get; set; }
+        public string? PdfUrl { get; set; }
         public List<DietDayModel> Days { get; set; } = new();
     }
 

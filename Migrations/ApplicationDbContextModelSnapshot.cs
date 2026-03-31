@@ -68,7 +68,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AdminUsers", (string)null);
+                    b.ToTable("AdminUsers");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.Concerns", b =>
@@ -104,7 +104,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("ConcernId");
 
-                    b.ToTable("Concerns", (string)null);
+                    b.ToTable("Concerns");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.CustomField", b =>
@@ -164,7 +164,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("CustomFormId");
 
-                    b.ToTable("CustomFields", (string)null);
+                    b.ToTable("CustomFields");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.CustomForm", b =>
@@ -211,7 +211,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("SubConcernId");
 
-                    b.ToTable("CustomForms", (string)null);
+                    b.ToTable("CustomForms");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.DietPlan", b =>
@@ -286,7 +286,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("ConcernId");
 
-                    b.ToTable("DietPlans", (string)null);
+                    b.ToTable("DietPlans");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.FormAnswer", b =>
@@ -315,7 +315,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("FormSubmissionFormSubId");
 
-                    b.ToTable("FormAnswer", (string)null);
+                    b.ToTable("FormAnswer");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.FormSubmission", b =>
@@ -353,7 +353,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("CustomFormId");
 
-                    b.ToTable("FormSubmissions", (string)null);
+                    b.ToTable("FormSubmissions");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.HerbCategory", b =>
@@ -387,7 +387,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("HerbCategories", (string)null);
+                    b.ToTable("HerbCategories");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.Page", b =>
@@ -427,36 +427,47 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Pages", (string)null);
+                    b.ToTable("Pages");
                 });
 
-            modelBuilder.Entity("ManvarFitness.Entity.Plan", b =>
+            modelBuilder.Entity("ManvarFitness.Entity.Payment", b =>
                 {
-                    b.Property<int>("PlanId")
+                    b.Property<long>("PaymentId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("bigint");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PlanId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("PaymentId"));
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<int>("DurationInDays")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("PlanName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Price")
+                    b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
-                    b.HasKey("PlanId");
+                    b.Property<string>("Currency")
+                        .HasColumnType("text");
 
-                    b.ToTable("Plans", (string)null);
+                    b.Property<DateTime>("PaidOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentGateway")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("SubscriptionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TransactionId")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PaymentId");
+
+                    b.ToTable("Payments", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.ResultEntity", b =>
@@ -518,7 +529,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Results", (string)null);
+                    b.ToTable("Results");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.Role", b =>
@@ -552,7 +563,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.RolePage", b =>
@@ -589,7 +600,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RolePages", (string)null);
+                    b.ToTable("RolePages");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.SubConcerns", b =>
@@ -630,7 +641,44 @@ namespace ManvarFitness.Migrations
 
                     b.HasIndex("ConcernId");
 
-                    b.ToTable("SubConcerns", (string)null);
+                    b.ToTable("SubConcerns");
+                });
+
+            modelBuilder.Entity("ManvarFitness.Entity.SubscriptionPlan", b =>
+                {
+                    b.Property<int>("PlanId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("PlanId"));
+
+                    b.Property<string>("Currency")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DurationDays")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<int?>("TrialDays")
+                        .HasColumnType("integer");
+
+                    b.HasKey("PlanId");
+
+                    b.ToTable("SubscriptionPlans", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.User", b =>
@@ -689,6 +737,61 @@ namespace ManvarFitness.Migrations
                         });
                 });
 
+            modelBuilder.Entity("ManvarFitness.Entity.UserDietPlans", b =>
+                {
+                    b.Property<int>("UserDietPlanId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserDietPlanId"));
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DietPlanData")
+                        .HasColumnType("text");
+
+                    b.Property<string>("DietPlanName")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsLatest")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("PdfUrl")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UserConcernId")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("ValidTill")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserDietPlanId");
+
+                    b.ToTable("UserDietPlans");
+                });
+
             modelBuilder.Entity("ManvarFitness.Entity.UserSubscription", b =>
                 {
                     b.Property<long>("SubscriptionId")
@@ -705,6 +808,9 @@ namespace ManvarFitness.Migrations
 
                     b.Property<bool>("IsTrial")
                         .HasColumnType("boolean");
+
+                    b.Property<long>("PaymentId")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("PlanId")
                         .HasColumnType("integer");
@@ -777,7 +883,7 @@ namespace ManvarFitness.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("WorkoutVideos", (string)null);
+                    b.ToTable("WorkoutVideos");
                 });
 
             modelBuilder.Entity("ManvarFitness.Entity.CustomField", b =>
