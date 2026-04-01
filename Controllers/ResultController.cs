@@ -32,6 +32,11 @@ namespace ManvarFitness.Controllers
         // GET: ResultController/Create
         public IActionResult Create()
         {
+            ViewBag.ConcernsList = new SelectList(
+                _context.Concerns,
+                "ConcernId",
+                "Name"
+            );
             ViewBag.SubConcerns = new SelectList(
                 _context.SubConcerns
                     .Include(s => s.Concern)
@@ -66,6 +71,7 @@ namespace ManvarFitness.Controllers
             var afterList = SaveFiles(model.AfterImageFile, uploadPath);
             var videoList = SaveFiles(model.Videos, uploadPath);
 
+            var concern = _context.Concerns.FirstOrDefault(x => x.ConcernId == model.ConcernId);
             //  Get SubConcern
             var subConcern = _context.SubConcerns.FirstOrDefault(x => x.SubConcernId == model.SubConcernId);
             if (subConcern == null)
@@ -220,6 +226,25 @@ namespace ManvarFitness.Controllers
             }
 
             return savedFiles;
+        }
+        public IActionResult GetSubConcerns(int? concernId)
+        {
+            var query = _context.SubConcerns.AsQueryable();
+
+            if (concernId.HasValue)
+            {
+                query = query.Where(s => s.ConcernId == concernId.Value);
+            }
+
+            var subConcerns = query
+                .Select(s => new
+                {
+                    subConcernId = s.SubConcernId,
+                    name = s.Name
+                })
+                .ToList();
+
+            return Json(subConcerns);
         }
     }
 }

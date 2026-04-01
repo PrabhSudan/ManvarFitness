@@ -11,7 +11,7 @@ namespace ManvarFitness.Models
         // Concern Category selection
         [Required(ErrorMessage = "Please Select a Concern")]
         public string? PersonName { get; set; }
-        public int ConcernCategoryId { get; set; }
+        public int ConcernId { get; set; }
         // Sub Concern selection
         [Required(ErrorMessage = "Please Select a Concern")]
         public int SubConcernId { get; set; }

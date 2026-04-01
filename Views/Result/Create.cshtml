@@ -29,6 +29,16 @@
                 <input asp-for="PersonName" class="form-control" placeholder="Enter Name if no account" />
                 <span asp-validation-for="UserId" class="text-danger"></span>
             </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ConcernId" class="form-label fw-semibold"></label>
+                <select asp-for="ConcernId"
+                        asp-items="ViewBag.ConcernsList"
+                        class="form-select">
+                    <option value="">-- Select Concern --</option>
+                </select>
+                <span asp-validation-for="ConcernId"
+                      class="text-danger"></span>
+            </div>
             <!-- SUB CONCERN -->
             <div class="col-md-6 mb-3">
                 <label asp-for="SubConcernId" class="form-label fw-semibold"></label>
