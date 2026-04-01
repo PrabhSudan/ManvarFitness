@@ -21,12 +21,12 @@
 
             <div class="col-md-6 mb-3">
                 <label asp-for="UserId" class="form-label fw-semibold"></label>
-                <select asp-for="UserId"
+               @*  <select asp-for="UserId"
                         asp-items="ViewBag.Users"
                         class="form-select">
                     <option value="">-- Select User --</option>
-                </select>
-                <input asp-for="PersonName" class="form-control" placeholder="Enter Name if no account" />
+                </select> *@
+                <input asp-for="PersonName" class="form-control" placeholder="Enter Name" />
                 <span asp-validation-for="UserId" class="text-danger"></span>
             </div>
             <div class="col-md-6 mb-3">
