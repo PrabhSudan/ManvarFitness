@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\pdfs\" />
+    <Folder Include="wwwroot\Rotativa\" />
   </ItemGroup>
 
 </Project>

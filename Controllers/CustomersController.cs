@@ -131,7 +131,7 @@ namespace ManvarFitness.Controllers
 
 
             var latestplan = _context.UserDietPlans
-                .Where(x => x.UserId == id && x.IsLatest )
+                .Where(x => x.UserId == id && x.UserConcernId == concernId && x.IsLatest )
                 .OrderByDescending(x => x.Version)
                 .FirstOrDefault();
 
@@ -225,9 +225,8 @@ namespace ManvarFitness.Controllers
 
             var jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(model);
 
-            //  Remove old latest
             var oldPlans = _context.UserDietPlans
-                .Where(x => x.UserId == model.UserId && x.IsLatest)
+                .Where(x => x.UserId == model.UserId && x.UserConcernId == model.ConcernId)
                 .ToList();
 
             foreach (var p in oldPlans)
@@ -239,7 +238,6 @@ namespace ManvarFitness.Controllers
                 ? oldPlans.Max(x => x.Version) + 1
                 : 1;
 
-            // prepare DB entity (PdfUrl will be set after generating PDF file)
             var newPlan = new ManvarFitness.Entity.UserDietPlans
             {
                 UserId = model.UserId,
@@ -255,7 +253,7 @@ namespace ManvarFitness.Controllers
                 ValidTill = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30))
             };
 
-            // generate PDF bytes from DownloadDietPlan view using a lightweight PDF view model
+           
             try
             {
                 var user = _context.Users.FirstOrDefault(x => x.UserId == model.UserId);
@@ -269,32 +267,32 @@ namespace ManvarFitness.Controllers
                 var pdfResult = new ViewAsPdf("DownloadDietPlan", pdfModel)
                 {
                     PageOrientation = Orientation.Landscape,
-                    PageSize = Size.A4
+                    PageSize = Size.A4,
+                    CustomSwitches = "--encoding utf-8 " +
+                 "--disable-smart-shrinking " +
+                 "--print-media-type " +
+                 "--no-outline " +
+                 "--disable-javascript " +
+                 "--disable-plugins " +
+                 "--quiet"
                 };
 
-                // BuildFile requires ControllerContext
                 var pdfBytesTask = pdfResult.BuildFile(ControllerContext);
                 pdfBytesTask.Wait();
                 var pdfBytes = pdfBytesTask.Result;
 
-                // Ensure directory exists
                 var pdfDir = Path.Combine(_env.WebRootPath, "pdfs");
                 Directory.CreateDirectory(pdfDir);
 
-                // safe filename
-                var safePlanName = string.IsNullOrWhiteSpace(model.Name) ? "dietplan" : string.Concat(model.Name.Split(Path.GetInvalidFileNameChars())).Replace(" ", "_");
                 var fileName = $"DietPlan_{model.UserId}_{model.ConcernId}_{DateTime.UtcNow:yyyyMMddHHmmss}.pdf";
                 var fullPath = Path.Combine(pdfDir, fileName);
 
                 System.IO.File.WriteAllBytes(fullPath, pdfBytes);
 
-                // set PdfUrl to DB entity
                 newPlan.PdfUrl = "/pdfs/" + fileName;
             }
             catch (Exception ex)
             {
-                // if PDF generation fails, still save the plan but without PdfUrl
-                // consider logging ex
                 newPlan.PdfUrl = null;
             }
 
@@ -308,7 +306,7 @@ namespace ManvarFitness.Controllers
         public IActionResult DownloadDietPlan(Guid userId, int? concernId)
         {
             var latestPlan = _context.UserDietPlans
-                .Where(x => x.UserId == userId && x.IsLatest /*&& x.UserConcernId == concernId*/)
+                .Where(x => x.UserId == userId && x.UserConcernId == concernId && x.IsLatest)
                 .OrderByDescending(x => x.Version)
                 .FirstOrDefault();
 

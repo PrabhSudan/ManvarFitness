@@ -165,7 +165,7 @@
 <button type="button" id="row-add" class="btn btn-success btn-sm px-4">Replicate</button>
 <button type="button" id="savediet" class="btn btn-success btn-sm px-4">Save</button>
 <a class="btn btn-secondary btn-sm px-4" asp-action="Index" asp-controller="Customers">Back</a>
-<a class="btn btn-success"
+<a class="btn btn-success" target="_blank"
    href="@Url.Action("DownloadDietPlan", "Customers", new { userId = ViewBag.UserId,concernId = Model.ConcernId  })">
     Download PDF
 </a>
