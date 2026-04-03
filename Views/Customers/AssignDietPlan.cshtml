@@ -164,14 +164,15 @@
 
 <button type="button" id="row-add" class="btn btn-success btn-sm px-4">Replicate</button>
 <button type="button" id="savediet" class="btn btn-success btn-sm px-4">Save</button>
+<button type="button" id="delete-row" class="btn btn-warning btn-sm px-4">Remove</button>
 <a class="btn btn-secondary btn-sm px-4" asp-action="Index" asp-controller="Customers">Back</a>
-<a class="btn btn-success" target="_blank"
+@* <a class="btn btn-success" 
    href="@Url.Action("DownloadDietPlan", "Customers", new { userId = ViewBag.UserId,concernId = Model.ConcernId  })">
     Download PDF
-</a>
+</a> *@
 
 <script>
-        document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
 
         const tableBody = document.getElementById("diet-body");
         let selectedRow = null;
@@ -230,15 +231,19 @@
                 return;
             }
 
+            const usedDays = Array.from(document.querySelectorAll("#diet-body .day-dropdown"))
+                    .map(dd => dd.value)
+                    .filter(v => v);
+
+             if (usedDays.length >= alldays.length) {
+                alert("All 7 days are already added!");
+                return;
+             }
             const newRow = selectedRow.cloneNode(true);
             newRow.classList.remove("selected");
 
             const daySelect = newRow.querySelector(".day-dropdown");
             if (daySelect) {
-                const usedDays = Array.from(document.querySelectorAll("#diet-body .day-dropdown"))
-                    .map(dd => dd.value)
-                    .filter(v => v);
-
                 const assignedDay = alldays.find(d => !usedDays.includes(d)) || "";
                 populateDropdown(daySelect, assignedDay);
             }
@@ -338,6 +343,45 @@
             })
             .catch(err => console.error(err));
         });
+        document.addEventListener("change", function (e) {
+            if (e.target.classList.contains("day-dropdown")) {
 
+                const currentRow = e.target.closest("tr");
+                const selectedDay = e.target.value;
+
+                const usedDays = getUsedDays(currentRow);
+                if (usedDays.includes(selectedDay)) {
+                    alert("This day is already selected!");
+                    e.target.value = "";
+                    return;
+                }
+                reorderRows();
+                document.querySelectorAll(".day-dropdown")
+                    .forEach(dd => populateDropdown(dd, dd.value));
+            }
+        });
+        document.getElementById("delete-row").addEventListener("click", function () {
+
+            if (!selectedRow) {
+                alert("Please select a row to delete!");
+                return;
+            }
+
+            if (!confirm("Are you sure you want to delete this row?")) {
+                return;
+            }
+
+            selectedRow.remove();
+            selectedRow = null;
+
+            refreshUI();
+        });
+
+        function refreshUI() {
+            document.querySelectorAll(".day-dropdown")
+            .forEach(dd => populateDropdown(dd, dd.value));
+
+            reorderRows();
+        }
     });
 </script>

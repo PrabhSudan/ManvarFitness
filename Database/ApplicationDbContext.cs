@@ -21,7 +21,6 @@ namespace ManvarFitness.Database
         public DbSet<ResultEntity> Results { get; set; }
         public DbSet<CustomForm> CustomForms { get; set; }
         public DbSet<CustomField> CustomFields { get; set; }
-        public DbSet<FormSubmission> FormSubmissions { get; set; }
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
         public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
         public DbSet<Payment> Payments { get; set; }
@@ -38,6 +37,8 @@ namespace ManvarFitness.Database
                 .ToTable("SubscriptionPlans", t => t.ExcludeFromMigrations());
             modelBuilder.Entity<Payment>()
                .ToTable("Payments", t => t.ExcludeFromMigrations());
+            modelBuilder.Entity<UserConcern>()
+               .ToTable("serConcerns", t => t.ExcludeFromMigrations());
         }
     }
 }

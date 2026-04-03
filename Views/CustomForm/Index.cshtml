@@ -72,10 +72,11 @@
 <table class="customers-table">
     <thead>
         <tr>
-            <th>Field</th>
+            <th>FieldName</th>
             <th>Field Type</th>
-            <th>Limit</th>
-            <th>IsActive</th>
+            <th>Options</th>
+            <th>ValidationData</th>
+            <th>IsIncluded</th>
             <th>IsRequired</th>
             <th>Actions</th>
         </tr>
@@ -84,46 +85,15 @@
         @foreach (var field in Model)
         {
             <tr>
-                <td>@field.Label</td>
+                <td>@field.FieldName</td>
                 <td>@field.FieldType</td>
-                <td>
-
-                    @if (field.MinValue != null || field.MaxValue != null)
-                    {
-                        @($"{field.MinValue ?? 0} - {field.MaxValue ?? 0}")
-                    }
-
-                    else if (field.MaxLength != null)
-                    {
-                        @($"Max {field.MaxLength}")
-                    }
-
-                    else if (field.Options != null && field.Options.Any())
-                    {
-                        @string.Join(", ", field.Options)
-                    }
-
-                    else if (field.Date != null)
-                    {
-                        @($"{field.Date?.ToShortDateString()}")
-                    }
-
-                    else if (field.StartTime != null || field.EndTime != null)
-                    {
-                        @($"{field.StartTime} - {field.EndTime}")
-                    }
-
-                    else if ( field.MaxFileSize != null)
-                    {
-                        @($"{field.MaxFileSize} MB")
-                    }
-
-                </td>
+                <td>@(string.IsNullOrEmpty(field.Options) ? "-" : field.Options)</td>
+                <td>@(string.IsNullOrEmpty(field.ValidationData) ? "-" : field.ValidationData)</td>
                 <td class="text-center">
                     <div class="form-check form-switch d-inline-block m-0">
-                        <input class="form-check-input toggle-active" type="checkbox"
+                        <input class="form-check-input toggle-included" type="checkbox"
                                data-id="@field.CustomFieldId"
-                               @(field.IsActive ? "checked" : "")>
+                               @(field.IsIncluded ? "checked" : "")>
                     </div>
                 </td>
                 <td class="text-center">
@@ -138,7 +108,7 @@
                             data-bs-toggle="modal"
                             data-bs-target="#deleteModal"
                             data-fieldid="@field.CustomFieldId"
-                            data-fieldname="@field.Label">
+                            data-fieldname="@field.CustomForm">
                         <i class="bi bi-trash-fill fs-5"></i>
                     </button>
                 </td>
@@ -211,6 +181,11 @@
             document.querySelectorAll(".toggle-required").forEach(cb => {
                 cb.addEventListener("change", function () {
                     toggleField("/CustomForm/ToggleRequired", this, this.dataset.id);
+                });
+            });
+            document.querySelectorAll(".toggle-required").forEach(cb => {
+                cb.addEventListener("change", function () {
+                    toggleField("/CustomForm/ToggleIncluded", this, this.dataset.id);
                 });
             });
 

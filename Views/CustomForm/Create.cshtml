@@ -43,10 +43,10 @@
         flex: 1 1 auto;
     }
 
-    .form-control:focus {
-        border-color: #ced4da;
-        box-shadow: 0 0 0 0.1rem rgba(0,0,0,0.08);
-    }
+        .form-control:focus {
+            border-color: #ced4da;
+            box-shadow: 0 0 0 0.1rem rgba(0,0,0,0.08);
+        }
 
     .number-range,
     .text-maxlength,
@@ -57,11 +57,11 @@
         align-items: center;
     }
 
-    .number-range input,
-    .text-maxlength input,
-    .options-box input {
-        flex: 1 1 auto;
-    }
+        .number-range input,
+        .text-maxlength input,
+        .options-box input {
+            flex: 1 1 auto;
+        }
 
     .field-item .add-field,
     .field-item .add-option,
@@ -88,15 +88,15 @@
         margin-top: 1.5rem;
     }
 
-    .action-row .btn {
-        width: 120px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        border-radius: 8px;
-    }
+        .action-row .btn {
+            width: 120px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            border-radius: 8px;
+        }
 
     .card-body {
         padding: 1rem 1.2rem;
@@ -132,438 +132,361 @@
         z-index: 1000;
     }
 
-    .custom-select-options div {
-        padding: 8px 12px;
-        cursor: pointer;
-    }
+        .custom-select-options div {
+            padding: 8px 12px;
+            cursor: pointer;
+        }
 
-    .custom-select-options div:hover {
-        background-color: #f1f1f1;
-    }
+            .custom-select-options div:hover {
+                background-color: #f1f1f1;
+            }
 </style>
 
 <div class="container mt-4">
-    <div class="card shadow-lg border-0">
-        <div class="card-body p-4">
-            <h2>Create Custom Field</h2>
+    <div class="card shadow p-4">
 
-            <form asp-action="Create" method="post">
-                @Html.AntiForgeryToken()
+        <h3 class="text-center mb-4">Create Custom Form</h3>
 
-                <div class="form-row d-flex gap-3">
-                    <!-- Concern -->
-                    <div class="form-group flex-fill">
-                        <label class="form-label">Select Main Concern</label>
-                        <div class="custom-select-wrapper" id="ConcernWrapper">
-                            <div class="custom-select-selected">-- Select Concern --</div>
-                            <div class="custom-select-options">
-                                @foreach(var item in ViewBag.ConcernsList)
-                                {
-                                    <div data-value="@item.Value">@item.Text</div>
-                                }
-                            </div>
-                            <select asp-for="ConcernId" class="d-none" id="ConcernId">
-                                <option value="">-- Select Concern --</option>
-                                @foreach(var item in ViewBag.ConcernsList)
-                                {
-                                    <option value="@item.Value">@item.Text</option>
-                                }
-                            </select>
-                        </div>
-                        <span asp-validation-for="ConcernId" class="text-danger"></span>
-                    </div>
+        <form method="post" id="customForm">
+            @Html.AntiForgeryToken()
 
-                    <!-- Sub Concern -->
-                    <div class="form-group flex-fill">
-                        <label class="form-label">Select Sub Concern</label>
-                        <div class="custom-select-wrapper" id="SubConcernWrapper">
-                            <div class="custom-select-selected">-- Select Sub Concern --</div>
-                            <div class="custom-select-options"></div>
-                            <select asp-for="SubConcernId" class="d-none" id="SubConcernId">
-                                <option value="">-- Select Sub Concern --</option>
-                            </select>
-                        </div>
-                        <span asp-validation-for="SubConcernId" class="text-danger"></span>
-                    </div>
+            <input type="hidden" id="CustomFieldData" name="CustomFieldData" />
+
+            <!-- Concern + SubConcern -->
+            <div class="row mb-3">
+
+                <div class="col-md-6">
+                    <label>Concern</label>
+                    <select asp-for="ConcernId" class="form-control" id="ConcernId">
+                        <option value="">-- Select Concern --</option>
+                        @foreach (var item in ViewBag.ConcernsList)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
                 </div>
 
-                <h5>Fields</h5>
+                <div class="col-md-6">
+                    <label>Sub Concern</label>
+                    <select asp-for="SubConcernId" class="form-control" id="SubConcernId">
+                        <option value="">-- Select Sub Concern --</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <hr />
+
+            <!-- Fields -->
+            <h5>Fields</h5>
                 <div id="fields-container">
                     <div class="field-item mb-2 d-flex align-items-center gap-2">
-                        <input name="Fields[0].Label" class="form-control me-2" placeholder="Field Name" required />
-                        <select name="Fields[0].FieldType" class="form-control field-type me-2">
-                            <option value="">Select FieldType</option>
-                            <option value="Text">Textbox</option>
-                            <option value="Textarea">Textarea</option>
-                            <option value="Date">Date</option>
-                            <option value="Number">Number</option>
-                            <option value="Select">Dropdown</option>
-                            <option value="File">File</option>
-                            <option value="Time">Time</option>
-                            <option value="Radio">Radio</option>
-                            <option value="Checkbox">Checkbox</option>
-                        </select>
-                        <div class="number-range d-none d-flex gap-2">
-                            <input name="Fields[0].MinValue" class="form-control" placeholder="Min" />
-                            <input name="Fields[0].MaxValue" class="form-control" placeholder="Max" />
-                        </div>
-                        <div class="text-maxlength d-none d-flex gap-2">
-                            <input name="Fields[0].MaxLength" class="form-control" placeholder="Enter Max Length" />
-                        </div>
-                        <div class="options-box d-none d-flex gap-2">
-                            <input name="Fields[0].Options" class="form-control" placeholder="Enter options" />
-                            <button type="button" class="btn btn-success btn-sm add-option">+</button>
-                        </div>
+                            <input type="text" class="form-control me-2" placeholder="Field Name" required />
+                            <select class="form-control field-type">
+                                <option value="">Select Type</option>
+                                <option value="Text">Textbox</option>
+                                <option value="Textarea">Textarea</option>
+                                <option value="Date">Date</option>
+                                <option value="Number">Number</option>
+                                <option value="Select">Dropdown</option>
+                                <option value="File">File</option>
+                                <option value="Time">Time</option>
+                                <option value="Radio">Radio</option>
+                                <option value="Checkbox">Checkbox</option>
+                            </select>
 
-                        <div class="file-settings d-none d-flex gap-2">
-                            <input name="Fields[0].MaxFileSize"
-                                   type="number"
-                                   class="form-control"
-                                   placeholder="Max MB">
-                        </div>
+                            <!-- Dynamic Boxes -->
+                            <div class="number-range d-none d-flex gap-2">
+                                <input type="number" class="form-control min" placeholder="Min Value" />
+                                <input type="number" class="form-control mt-2 max" placeholder="Max Value" />
+                            </div>
 
-                        <div class="date-settings d-none d-flex gap-2">
+                            <div class="text-maxlength d-none d-flex gap-2">
+                                <input type="number" class="form-control maxlength" placeholder="Max Length" />
+                            </div>
 
-                            <input name="Fields[0].MinDate"
-                                   type="date"
-                                   class="form-control"
-                                   placeholder="Date">
+                            <div class="options-box d-none d-flex flex-wrap gap-2 align-items-center">
 
-                        </div>
+                                <div class="d-flex gap-2 option-row align-items-center">
+                                    <input type="text" class="form-control option-input" placeholder="option" />
+                                    <button type="button" class="btn btn-success btn-sm add-option">+</button>
+                                </div>
 
-                        <div class="time-range d-none d-flex gap-2">
-                            <input name="Fields[0].StartTime"
-                                   type="time"
-                                   class="form-control">
+                            </div>
 
-                            <input name="Fields[0].EndTime"
-                                   type="time"
-                                   class="form-control">
-                        </div>
+                            <div class="file-settings d-none d-flex gap-2">
+                                <input type="number" class="form-control maxfilesize" placeholder="Max File Size (MB)" />
+                            </div>
+
+                            <div class="date-settings d-none d-flex gap-2">
+                                <input type="date" class="form-control" />
+                            </div>
+
+                            <div class="time-range d-none d-flex gap-2">
+                                <input type="time" class="form-control starttime" />
+                                <input type="time" class="form-control endtime mt-2" />
+                            </div>
+                            
                     </div>
+
+                        <!-- REMOVE BUTTON -->
+                        <div class="col-md-2 d-flex align-items-start">
+                            <button type="button" class="btn btn-danger remove-field d-none">−</button>
+                        </div>
+
                 </div>
 
-                <div class="action-row">
-                    <button type="button" class="btn btn-success btn-sm add-field">Add</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
-                </div>
-            </form>
-        </div>
+       
+
+            <!-- Buttons -->
+            <div class="text-center mt-3">
+                <button type="button" id="addField" class="btn btn-success">Add Field</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+
+        </form>
+
     </div>
 </div>
-@section Scripts {
-    <script>
 
-        // Custom Select Dropdown
+<script>
+        const container = document.getElementById("fields-container");
 
-                function setupCustomSelect(wrapperId, hiddenSelectId) {
-            const wrapper = document.getElementById(wrapperId);
-            const selected = wrapper.querySelector('.custom-select-selected');
-            const optionsContainer = wrapper.querySelector('.custom-select-options');
-            const hiddenSelect = document.getElementById(hiddenSelectId);
 
-            // Toggle dropdown on click
-            selected.addEventListener('click', () => {
-                optionsContainer.style.display = optionsContainer.style.display === 'block' ? 'none' : 'block';
-            });
+    // --------------------
+    // CONCERN → SUBCONCERN
+    // --------------------
+    document.getElementById("ConcernId").addEventListener("change", function () {
 
-            // Handle option clicks
-            optionsContainer.querySelectorAll('div').forEach(option => {
-                option.addEventListener('click', () => {
-                    const value = option.dataset.value;
-                    const text = option.textContent;
+        const subSelect = document.getElementById("SubConcernId");
 
-                    // Update hidden select
-                    hiddenSelect.value = value;
+        fetch(`/CustomForm/GetSubConcerns?concernId=${this.value}`)
+            .then(res => res.json())
+            .then(data => {
 
-                    // Update visible text
-                    selected.textContent = text;
+                subSelect.innerHTML = '<option value="">-- Select Sub Concern --</option>';
 
-                    // Close dropdown
-                    optionsContainer.style.display = 'none';
+                if (data.length === 0) {
+                    subSelect.disabled = true;
+                    return;
+                }
 
-                    // Trigger change event if needed (for Sub-Concern load)
-                    hiddenSelect.dispatchEvent(new Event('change'));
+                subSelect.disabled = false;
+
+                data.forEach(item => {
+                    let opt = document.createElement("option");
+                    opt.value = item.subConcernId;
+                    opt.textContent = item.name;
+                    subSelect.appendChild(opt);
                 });
-            });
 
-            // Close dropdown if clicked outside
-            document.addEventListener('click', (e) => {
-                if (!wrapper.contains(e.target)) {
-                    optionsContainer.style.display = 'none';
+            })
+            .catch(() => {
+                subSelect.disabled = true;
+            });
+    });
+
+
+    // --------------------
+    // ADD FIELD
+    // --------------------
+    document.getElementById("addField").addEventListener("click", function () {
+
+        let first = container.querySelector(".field-item");
+        let clone = first.cloneNode(true);
+
+        // reset inputs
+        clone.querySelectorAll("input").forEach(i => i.value = "");
+        clone.querySelector("select").value = "";
+
+        // clear options
+        let optContainer = clone.querySelector(".options-box");
+        if (optContainer) {
+            let rows = optContainer.querySelectorAll(".option-row");
+            rows.forEach((row, index) => {
+                if (index === 0) {
+                    row.querySelector("input").value = "";
+                    row.querySelector(".remove-option")?.remove();
+                } else {
+                    row.remove();
                 }
             });
         }
 
-        setupCustomSelect("ConcernWrapper", "ConcernId");
-        setupCustomSelect("SubConcernWrapper", "SubConcernId");
+        // hide all dynamic sections
+        clone.querySelectorAll(".number-range, .text-maxlength, .options-box, .file-settings, .date-settings, .time-range")
+            .forEach(el => el.classList.add("d-none"));
 
-        // Load SubConcerns
+        // show remove button
+        clone.querySelector(".remove-field").classList.remove("d-none");
 
-        document.getElementById("ConcernId").addEventListener("change", function () {
+        container.appendChild(clone);
+    });
 
-            const concernId = this.value;
 
-            fetch(`/CustomForm/GetSubConcerns?concernId=${concernId}`)
-                .then(res => res.json())
-                .then(data => {
+    // --------------------
+    // REMOVE FIELD
+    // --------------------
+    container.addEventListener("click", function (e) {
 
-                    const subWrapper = document.getElementById("SubConcernWrapper");
-                    const optionsContainer = subWrapper.querySelector(".custom-select-options");
-                    const hiddenSelect = document.getElementById("SubConcernId");
+        if (e.target.classList.contains("remove-field")) {
 
-                    optionsContainer.innerHTML = "";
-                    hiddenSelect.innerHTML = '<option value="">-- Select Sub Concern --</option>';
+            if (container.querySelectorAll(".field-item").length === 1) return;
 
-                    data.forEach(item => {
+            e.target.closest(".field-item").remove();
+        }
+    });
 
-                        const div = document.createElement("div");
-                        div.dataset.value = item.subConcernId;
-                        div.textContent = item.name;
 
-                        optionsContainer.appendChild(div);
+    // --------------------
+    // ADD / REMOVE OPTIONS
+    // --------------------
+        container.addEventListener("click", function (e) {
 
-                        const opt = document.createElement("option");
-                        opt.value = item.subConcernId;
-                        opt.textContent = item.name;
+        if (e.target.classList.contains("add-option")) {
 
-                        hiddenSelect.appendChild(opt);
+            let box = e.target.closest(".options-box");
 
-                    });
+            let row = document.createElement("div");
+            row.className = "d-flex gap-2 option-row align-items-center";
 
-                    subWrapper.querySelector(".custom-select-selected").textContent = "-- Select Sub Concern --";
-                    hiddenSelect.value = "";
+            row.innerHTML = `
+                <input type="text" class="form-control option-input" placeholder="Option" />
+                <button type="button" class="btn btn-danger btn-sm remove-option">-</button>
+            `;
 
-                });
+            box.appendChild(row);
+        }
 
-        });
+        if (e.target.classList.contains("remove-option")) {
+            e.target.closest(".option-row").remove();
+        }
 
-        // Dynamic Fields
+    });
 
-        let fieldIndex = 1;
+    // --------------------
+    // FIELD TYPE CHANGE
+    // --------------------
+    container.addEventListener("change", function (e) {
 
-        const fieldsContainer = document.getElementById("fields-container");
-        const form = document.querySelector("form");
+        if (!e.target.classList.contains("field-type")) return;
 
-        fieldsContainer.addEventListener("click", function (e) {
+        let parent = e.target.closest(".field-item");
 
-            // Add Option
+        parent.querySelectorAll(".number-range, .text-maxlength, .options-box, .file-settings, .date-settings, .time-range")
+            .forEach(el => el.classList.add("d-none"));
 
-            if (e.target.classList.contains("add-option")) {
+        let type = e.target.value;
 
-                const parent = e.target.closest(".options-box");
+        if (type === "Number")
+            parent.querySelector(".number-range").classList.remove("d-none");
 
-                const wrapper = document.createElement("div");
-                wrapper.style.display = "flex";
-                wrapper.style.gap = "4px";
+        if (type === "Text" || type === "Textarea")
+            parent.querySelector(".text-maxlength").classList.remove("d-none");
 
-                const input = document.createElement("input");
-                input.type = "text";
-                input.className = "form-control";
-                input.placeholder = "Option value";
+        if (["Select", "Radio", "Checkbox"].includes(type)) {
 
-                const removeBtn = document.createElement("button");
-                removeBtn.type = "button";
-                removeBtn.className = "btn btn-danger btn-sm remove-option";
-                removeBtn.textContent = "-";
+            let optBox = parent.querySelector(".options-box");
+            optBox.classList.remove("d-none");
 
-                wrapper.appendChild(input);
-                wrapper.appendChild(removeBtn);
+            // ensure at least one option input
+            let firstRow = optBox.querySelector(".option-row");
 
-                parent.insertBefore(wrapper, e.target);
-            }
+            if (!firstRow) {
+                let row = document.createElement("div");
+                row.className = "d-flex gap-2 mt-1 option-row";
 
-            // Remove Option
-
-            if (e.target.classList.contains("remove-option")) {
-                e.target.closest("div").remove();
-            }
-
-            // Add Field
-
-            if (e.target.classList.contains("add-field")) {
-
-                const div = document.createElement("div");
-
-                div.classList.add("field-item","mb-3","d-flex","align-items-center","gap-2");
-
-                div.innerHTML = `
-                    <input name="Fields[${fieldIndex}].Label"
-                           class="form-control"
-                           placeholder="Field Name"
-                           required />
-
-                    <select name="Fields[${fieldIndex}].FieldType"
-                            class="form-control field-type">
-
-                        <option value="">Select FieldType</option>
-                        <option value="Text">Textbox</option>
-                        <option value="Textarea">Textarea</option>
-                        <option value="Date">Date</option>
-                        <option value="Number">Number</option>
-                        <option value="Select">Dropdown</option>
-                        <option value="File">File</option>
-                        <option value="Time">Time</option>
-                        <option value="Radio">Radio</option>
-                        <option value="Checkbox">Checkbox</option>
-
-                    </select>
-
-                    <div class="number-range d-none d-flex gap-2">
-                        <input name="Fields[${fieldIndex}].MinValue" class="form-control" placeholder="Min"/>
-                        <input name="Fields[${fieldIndex}].MaxValue" class="form-control" placeholder="Max"/>
-                    </div>
-
-                    <div class="text-maxlength d-none d-flex gap-2">
-                        <input name="Fields[${fieldIndex}].MaxLength" type="number" class="form-control" placeholder="Max Length"/>
-                    </div>
-
-                    <div class="options-box d-none d-flex gap-2">
-                        <input name="Fields[${fieldIndex}].Options[0]" class="form-control" placeholder="Option value"/>
-                        <button type="button" class="btn btn-success btn-sm add-option">+</button>
-                    </div>
-
-                    <div class="file-settings d-none d-flex gap-2">
-
-                        <input name="Fields[${fieldIndex}].MaxFileSize"
-                               type="number"
-                               class="form-control"
-                               placeholder="Max MB">
-                    </div>
-
-                     <div class="date-settings d-none d-flex gap-2">
-                            <input name="Fields[${fieldIndex}].MinDate"
-                                    type="date"
-                                    class="form-control">
-
-                             <input name="Fields[${fieldIndex}].MaxDate"
-                                    type="date"
-                                    class="form-control">
-                        </div>
-
-                        <div class="time-range d-none d-flex gap-2">
-                                    <input name="Fields[${fieldIndex}].StartTime"
-                                        type="time"
-                                        class="form-control">
-                                    <input name="Fields[${fieldIndex}].EndTime"
-                                        type="time"
-                                        class="form-control">
-                        </div>
-
-                    <button type="button" class="btn btn-danger btn-sm remove-field">-</button>
+                row.innerHTML = `
+                    <input type="text" class="form-control option-input" placeholder="Enter option" />
+                    <button type="button" class="btn btn-success btn-sm add-option">+</button>
                 `;
 
-                fieldsContainer.appendChild(div);
-
-                fieldIndex++;
+                optBox.appendChild(row);
             }
-
-            // Remove Field
-
-            if (e.target.classList.contains("remove-field")) {
-                e.target.closest(".field-item").remove();
-                reIndexFields();
-            }
-
-        });
-
-        // Field Type Change
-
-        fieldsContainer.addEventListener("change", function (e) {
-
-            if (!e.target.classList.contains("field-type")) return;
-
-            const parent = e.target.closest(".field-item");
-
-            const numberRange = parent.querySelector(".number-range");
-            const textMax = parent.querySelector(".text-maxlength");
-            const optionsBox = parent.querySelector(".options-box");
-            const fileSettings = parent.querySelector(".file-settings");
-            const dateSettings = parent.querySelector(".date-settings");
-            const timeRange = parent.querySelector(".time-range");
-
-            numberRange?.classList.add("d-none");
-            textMax?.classList.add("d-none");
-            optionsBox?.classList.add("d-none");
-            fileSettings?.classList.add("d-none");
-            dateSettings?.classList.add("d-none");
-            timeRange?.classList.add("d-none");
-
-            const type = e.target.value;
-
-            if (type === "Number")
-                numberRange?.classList.remove("d-none");
-
-            if (type === "Text" || type === "Textarea")
-                textMax?.classList.remove("d-none");
-
-            if (["Select","Radio","Checkbox"].includes(type))
-                optionsBox?.classList.remove("d-none");
-
-            if (type === "File")
-                fileSettings?.classList.remove("d-none");
-
-            if (type === "Date")
-                dateSettings?.classList.remove("d-none");
-
-            if (type === "Time")
-                timeRange?.classList.remove("d-none");
-
-        });
-
-        // ReIndex Fields
-
-        function reIndexFields(){
-
-            const items = document.querySelectorAll("#fields-container .field-item");
-
-            items.forEach((item,index)=>{
-
-                item.querySelectorAll("input,select").forEach(input=>{
-
-                    if(input.name){
-                        input.name = input.name.replace(/Fields\[\d+\]/,`Fields[${index}]`);
-                    }
-
-                });
-
-            });
-
         }
 
-        // Submit Validation
+        if (type === "File")
+            parent.querySelector(".file-settings").classList.remove("d-none");
 
-        form.addEventListener("submit",function(e){
+        if (type === "Date")
+            parent.querySelector(".date-settings").classList.remove("d-none");
 
-            reIndexFields();
+        if (type === "Time")
+            parent.querySelector(".time-range").classList.remove("d-none");
 
-            let isValid = true;
+    });
 
-            document.querySelectorAll(".field-item").forEach(item=>{
 
-                const type = item.querySelector(".field-type").value;
-                const maxLength = item.querySelector(".text-maxlength input");
-                const options = item.querySelectorAll(".options-box input");
+    // --------------------
+    // SUBMIT → JSON
+    // --------------------
+        document.getElementById("customForm").addEventListener("submit", function () {
 
-                if(type==="Text" || type==="Textarea"){
-                    if(!maxLength || !maxLength.value){
-                        alert("Max Length required");
-                        isValid=false;
+        let fields = [];
+
+        document.querySelectorAll(".field-item").forEach(item => {
+
+            let fieldName = item.querySelector("input[type='text']")?.value || "";
+            let fieldType = item.querySelector(".field-type")?.value || "";
+
+            let field = {
+                FieldName: fieldName,
+                FieldType: fieldType,
+                Options: [],
+                Min: null,
+                Max: null,
+                MaxLength: null,
+                StartTime: null,
+                EndTime: null,
+                MaxFileSize: null,
+                IsIncluded: false,
+                IsRequired: false
+            };
+
+            // NUMBER
+            if (fieldType === "Number") {
+                let minVal = item.querySelector(".min")?.value;
+                let maxVal = item.querySelector(".max")?.value;
+
+                field.Min = minVal !== "" ? parseInt(minVal) : null;
+                field.Max = maxVal !== "" ? parseInt(maxVal) : null;
+            }
+
+            // TEXT
+            if (fieldType === "Text" || fieldType === "Textarea") {
+                let maxLength = item.querySelector(".maxlength")?.value;
+
+                field.MaxLength = maxLength !== "" ? parseInt(maxLength) : null;
+            }
+
+            // OPTIONS
+            if (["Select", "Radio", "Checkbox"].includes(fieldType)) {
+
+                item.querySelectorAll(".option-input").forEach(opt => {
+                    if (opt.value.trim() !== "") {
+                        field.Options.push(opt.value.trim());
                     }
-                }
+                });
 
-                if(["Select","Radio","Checkbox"].includes(type)){
-                    if(!options || Array.from(options).every(o=>!o.value.trim())){
-                        alert("Options required");
-                        isValid=false;
-                    }
-                }
+            } else {
+                field.Options = null;
+            }
 
-            });
+            // FILE
+            if (fieldType === "File") {
+                let fileSize = item.querySelector(".maxfilesize")?.value;
+                field.MaxFileSize = fileSize !== "" ? parseInt(fileSize) : null;
+            }
 
-            if(!isValid) e.preventDefault();
+            // TIME
+            if (fieldType === "Time") {
+                field.StartTime = item.querySelector(".starttime")?.value || null;
+                field.EndTime = item.querySelector(".endtime")?.value || null;
+            }
 
+            fields.push(field);
         });
 
-    </script>
-}
+        document.getElementById("CustomFieldData").value = JSON.stringify(fields);
+    });
+</script>

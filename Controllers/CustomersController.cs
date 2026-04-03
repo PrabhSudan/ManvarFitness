@@ -131,7 +131,9 @@ namespace ManvarFitness.Controllers
 
 
             var latestplan = _context.UserDietPlans
-                .Where(x => x.UserId == id && x.UserConcernId == concernId && x.IsLatest )
+                .Where(x => x.UserId == id
+                && (concernId == null || concernId == 0 || x.UserConcernId == concernId)
+                && x.IsLatest)
                 .OrderByDescending(x => x.Version)
                 .FirstOrDefault();
 
@@ -226,7 +228,8 @@ namespace ManvarFitness.Controllers
             var jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(model);
 
             var oldPlans = _context.UserDietPlans
-                .Where(x => x.UserId == model.UserId && x.UserConcernId == model.ConcernId)
+                .Where(x => x.UserId == model.UserId
+                    && (model.ConcernId == 0 || x.UserConcernId == model.ConcernId))
                 .ToList();
 
             foreach (var p in oldPlans)
@@ -306,7 +309,8 @@ namespace ManvarFitness.Controllers
         public IActionResult DownloadDietPlan(Guid userId, int? concernId)
         {
             var latestPlan = _context.UserDietPlans
-                .Where(x => x.UserId == userId && x.UserConcernId == concernId && x.IsLatest)
+                .Where(x => x.UserId == userId
+                && (concernId == null || concernId == 0 || x.UserConcernId == concernId) && x.IsLatest)
                 .OrderByDescending(x => x.Version)
                 .FirstOrDefault();
 
